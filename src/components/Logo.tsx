@@ -11,11 +11,15 @@ export function Logo({ className, size = 40 }: { className?: string; size?: numb
       )}
       style={{ width: size, height: size }}
     >
+      <div
+        className="absolute inset-0"
+        style={{ background: "var(--gradient-aura)" }}
+      />
       <img
         src={logoAsset.url}
         alt="AuraHowls"
-        className="h-full w-full object-cover"
-        style={{ filter: "invert(1) hue-rotate(180deg) brightness(1.6) contrast(1.1)" }}
+        className="relative h-full w-full object-cover"
+        style={{ mixBlendMode: "screen", filter: "invert(1) contrast(1.2)" }}
       />
     </div>
   );
