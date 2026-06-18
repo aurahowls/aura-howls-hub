@@ -72,7 +72,6 @@ export async function fetchFeed(opts?: { authorId?: string }): Promise<HowlRecor
     .from("howls")
     .select(
       `id, author_id, content, view_count, howl_count, echo_count, rehowl_count, edited, created_at, updated_at,
-       author:profiles!howls_author_id_fkey ( id, username, display_name, avatar_url ),
        media:howl_media ( id, storage_path, media_type, position )`,
     )
     .order("created_at", { ascending: false })
@@ -83,8 +82,17 @@ export async function fetchFeed(opts?: { authorId?: string }): Promise<HowlRecor
 
   const userId = (await supabase.auth.getUser()).data.user?.id;
   const ids = (data ?? []).map((d) => d.id);
+  const authorIds = Array.from(new Set((data ?? []).map((d) => d.author_id)));
   let likedSet = new Set<string>();
   let rehowledSet = new Set<string>();
+  let authorMap = new Map<string, HowlAuthor>();
+  if (authorIds.length) {
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, username, display_name, avatar_url")
+      .in("id", authorIds);
+    for (const p of profs ?? []) authorMap.set(p.id, p as HowlAuthor);
+  }
   if (userId && ids.length) {
     const [likes, rehowls] = await Promise.all([
       supabase.from("howl_likes").select("howl_id").eq("user_id", userId).in("howl_id", ids),
@@ -97,8 +105,7 @@ export async function fetchFeed(opts?: { authorId?: string }): Promise<HowlRecor
   const rows = await Promise.all(
     (data ?? []).map(async (d) => {
       const media = await signMediaUrls((d.media as any) ?? []);
-      const authorRaw = (d as any).author;
-      const author: HowlAuthor | null = Array.isArray(authorRaw) ? authorRaw[0] ?? null : authorRaw;
+      const author = authorMap.get(d.author_id) ?? null;
       return {
         ...d,
         author,
@@ -275,16 +282,21 @@ export async function fetchEchoes(howlId: string): Promise<EchoRecord[]> {
   const { data, error } = await supabase
     .from("howl_echoes")
     .select(
-      `id, howl_id, author_id, content, created_at,
-       author:profiles!howl_echoes_author_id_fkey ( id, username, display_name, avatar_url )`,
+      `id, howl_id, author_id, content, created_at`,
     )
     .eq("howl_id", howlId)
     .order("created_at", { ascending: true });
   if (error) throw error;
-  return (data ?? []).map((d: any) => ({
-    ...d,
-    author: Array.isArray(d.author) ? d.author[0] ?? null : d.author,
-  }));
+  const ids = Array.from(new Set((data ?? []).map((d) => d.author_id)));
+  const map = new Map<string, HowlAuthor>();
+  if (ids.length) {
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, username, display_name, avatar_url")
+      .in("id", ids);
+    for (const p of profs ?? []) map.set(p.id, p as HowlAuthor);
+  }
+  return (data ?? []).map((d) => ({ ...d, author: map.get(d.author_id) ?? null }));
 }
 
 export async function createEcho(howlId: string, content: string) {
