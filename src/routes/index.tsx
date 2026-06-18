@@ -29,10 +29,10 @@ function Index() {
           <span className="font-display text-xl font-bold text-gradient-gold">AuraHowls</span>
         </div>
         <nav className="flex items-center gap-2">
-          <Link to="/login">
+          <Link to="/auth">
             <Button variant="ghost" className="rounded-full">Sign in</Button>
           </Link>
-          <Link to="/register">
+          <Link to="/auth">
             <Button className="btn-gold rounded-full px-6">Join the Pack</Button>
           </Link>
         </nav>
@@ -53,7 +53,7 @@ function Index() {
             Share a Howl, send an Echo, and feel the moonlight on your timeline.
           </p>
           <div className="flex flex-wrap gap-3 pt-2">
-            <Link to="/register">
+            <Link to="/auth">
               <Button className="btn-gold h-12 rounded-full px-8 text-base">Create your Den</Button>
             </Link>
             <Link to="/home">

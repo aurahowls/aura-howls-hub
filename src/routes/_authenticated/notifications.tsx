@@ -4,13 +4,7 @@ import { notifications } from "@/lib/mock-data";
 import { Repeat2, MessageCircle, UserPlus, AtSign } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-export const Route = createFileRoute("/notifications")({
-  head: () => ({
-    meta: [
-      { title: "Wolf Alerts — AuraHowls" },
-      { name: "description", content: "Howls, Echoes, Rehowls, and Pack updates." },
-    ],
-  }),
+export const Route = createFileRoute("/_authenticated/notifications")({
   component: NotificationsPage,
 });
 

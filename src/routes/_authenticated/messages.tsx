@@ -1,17 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { conversations, currentWolf } from "@/lib/mock-data";
+import { conversations } from "@/lib/mock-data";
 import { useState } from "react";
 import { Send } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
-export const Route = createFileRoute("/messages")({
-  head: () => ({
-    meta: [
-      { title: "Pack DMs — AuraHowls" },
-      { name: "description", content: "Private dens for late-night howls." },
-    ],
-  }),
+export const Route = createFileRoute("/_authenticated/messages")({
   component: MessagesPage,
 });
 
@@ -22,8 +17,13 @@ const fakeThread = [
 ];
 
 function MessagesPage() {
+  const { profile } = useCurrentUser();
   const [active, setActive] = useState(conversations[0].id);
   const activeConvo = conversations.find((c) => c.id === active) ?? conversations[0];
+
+  const myAvatar =
+    profile?.avatar_url ??
+    `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(profile?.username ?? "wolf")}`;
 
   return (
     <AppShell rightRail={false}>
@@ -70,9 +70,7 @@ function MessagesPage() {
                 <div
                   className={cn(
                     "max-w-[75%] rounded-2xl px-4 py-2 text-sm",
-                    m.from === "me"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground",
+                    m.from === "me" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
                   )}
                 >
                   {m.text}
@@ -80,12 +78,10 @@ function MessagesPage() {
               </div>
             ))}
           </div>
-          <form
-            className="flex items-center gap-2 border-t border-border p-3"
-            onSubmit={(e) => e.preventDefault()}
-          >
-            <img src={currentWolf.avatar} alt="" className="h-8 w-8 rounded-full" />
+          <form className="flex items-center gap-2 border-t border-border p-3" onSubmit={(e) => e.preventDefault()}>
+            <img src={myAvatar} alt="" className="h-8 w-8 rounded-full" />
             <input
+              maxLength={1000}
               placeholder="Send a howl…"
               className="flex-1 rounded-full border border-border bg-card/60 px-4 py-2 text-sm outline-none focus:border-primary"
             />

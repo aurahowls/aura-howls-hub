@@ -4,13 +4,7 @@ import { Search as SearchIcon } from "lucide-react";
 import { wolves, trending } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/search")({
-  head: () => ({
-    meta: [
-      { title: "Search — AuraHowls" },
-      { name: "description", content: "Track wolves, Howls, and trending packs." },
-    ],
-  }),
+export const Route = createFileRoute("/_authenticated/search")({
   component: SearchPage,
 });
 
@@ -20,6 +14,7 @@ function SearchPage() {
       <div className="relative mb-6">
         <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
         <input
+          maxLength={120}
           placeholder="Search Howls, wolves, trails…"
           className="w-full rounded-full border border-border bg-card/60 py-3.5 pl-12 pr-4 text-base outline-none backdrop-blur transition focus:border-primary focus:aura-glow"
         />

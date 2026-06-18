@@ -3,25 +3,25 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { HowlCard, HowlSkeleton } from "@/components/HowlCard";
 import { Button } from "@/components/ui/button";
-import { howls, currentWolf } from "@/lib/mock-data";
+import { howls } from "@/lib/mock-data";
 import { Image, Smile, Sparkles } from "lucide-react";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
-export const Route = createFileRoute("/home")({
-  head: () => ({
-    meta: [
-      { title: "Den — AuraHowls" },
-      { name: "description", content: "Your live feed of Howls from the Pack." },
-    ],
-  }),
+export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
 });
 
 function HomePage() {
   const [loading, setLoading] = useState(true);
+  const { profile } = useCurrentUser();
   useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 600);
+    const t = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(t);
   }, []);
+
+  const avatarUrl =
+    profile?.avatar_url ??
+    `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(profile?.username ?? "wolf")}`;
 
   return (
     <AppShell>
@@ -35,10 +35,11 @@ function HomePage() {
 
       <div className="glass-card mb-4 rounded-3xl p-5">
         <div className="flex gap-3">
-          <img src={currentWolf.avatar} alt="" className="h-11 w-11 rounded-full ring-1 ring-primary/40" />
+          <img src={avatarUrl} alt="" className="h-11 w-11 rounded-full ring-1 ring-primary/40" />
           <div className="min-w-0 flex-1">
             <textarea
               placeholder="What's howling, wolf?"
+              maxLength={500}
               className="min-h-[60px] w-full resize-none bg-transparent text-lg outline-none placeholder:text-muted-foreground"
             />
             <div className="mt-2 flex items-center justify-between">
