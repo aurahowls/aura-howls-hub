@@ -1,19 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
-import { HowlCard } from "@/components/HowlCard";
+import { HowlCard, HowlSkeleton } from "@/components/HowlCard";
 import { Button } from "@/components/ui/button";
-import { howls } from "@/lib/mock-data";
 import { MapPin, CalendarDays, Link2 } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { Link } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
+import { fetchFeed, type HowlRecord } from "@/lib/howls";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 });
 
 function ProfilePage() {
-  const { profile, loading } = useCurrentUser();
-  const myHowls = howls.slice(0, 3);
+  const { user, profile, loading } = useCurrentUser();
+  const [myHowls, setMyHowls] = useState<HowlRecord[]>([]);
+  const [howlsLoading, setHowlsLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    if (!user?.id) return;
+    setHowlsLoading(true);
+    try {
+      const data = await fetchFeed({ authorId: user.id });
+      setMyHowls(data);
+    } finally {
+      setHowlsLoading(false);
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const displayName = profile?.display_name ?? profile?.username ?? "Wolf";
   const handle = profile?.username ?? "wolf";
@@ -76,7 +93,17 @@ function ProfilePage() {
       </div>
 
       <div className="mt-4 space-y-3">
-        {myHowls.map((h) => <HowlCard key={h.id} howl={h} />)}
+        {howlsLoading ? (
+          Array.from({ length: 2 }).map((_, i) => <HowlSkeleton key={i} />)
+        ) : myHowls.length === 0 ? (
+          <div className="glass-card rounded-3xl p-8 text-center text-sm text-muted-foreground">
+            No Howls yet. Share your first one from the Den.
+          </div>
+        ) : (
+          myHowls.map((h) => (
+            <HowlCard key={h.id} howl={h} onChanged={load} onDeleted={load} />
+          ))
+        )}
       </div>
     </AppShell>
   );

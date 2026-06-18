@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { HowlCard, HowlSkeleton } from "@/components/HowlCard";
-import { Button } from "@/components/ui/button";
-import { howls } from "@/lib/mock-data";
-import { Image, Smile, Sparkles } from "lucide-react";
-import { useCurrentUser } from "@/hooks/use-current-user";
+import { HowlComposer } from "@/components/HowlComposer";
+import { fetchFeed, type HowlRecord } from "@/lib/howls";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
@@ -13,15 +12,22 @@ export const Route = createFileRoute("/_authenticated/home")({
 
 function HomePage() {
   const [loading, setLoading] = useState(true);
-  const { profile } = useCurrentUser();
-  useEffect(() => {
-    const t = setTimeout(() => setLoading(false), 400);
-    return () => clearTimeout(t);
+  const [items, setItems] = useState<HowlRecord[]>([]);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await fetchFeed();
+      setItems(data);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to load Howls");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const avatarUrl =
-    profile?.avatar_url ??
-    `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(profile?.username ?? "wolf")}`;
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   return (
     <AppShell>
@@ -33,31 +39,21 @@ function HomePage() {
         </div>
       </div>
 
-      <div className="glass-card mb-4 rounded-3xl p-5">
-        <div className="flex gap-3">
-          <img src={avatarUrl} alt="" className="h-11 w-11 rounded-full ring-1 ring-primary/40" />
-          <div className="min-w-0 flex-1">
-            <textarea
-              placeholder="What's howling, wolf?"
-              maxLength={500}
-              className="min-h-[60px] w-full resize-none bg-transparent text-lg outline-none placeholder:text-muted-foreground"
-            />
-            <div className="mt-2 flex items-center justify-between">
-              <div className="flex gap-1 text-primary">
-                <button className="rounded-full p-2 hover:bg-primary/10"><Image className="h-4 w-4" /></button>
-                <button className="rounded-full p-2 hover:bg-primary/10"><Smile className="h-4 w-4" /></button>
-                <button className="rounded-full p-2 hover:bg-primary/10"><Sparkles className="h-4 w-4" /></button>
-              </div>
-              <Button className="btn-gold rounded-full px-6">Howl</Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <HowlComposer onPosted={load} />
 
       <div className="space-y-3">
-        {loading
-          ? Array.from({ length: 3 }).map((_, i) => <HowlSkeleton key={i} />)
-          : howls.map((h) => <HowlCard key={h.id} howl={h} />)}
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => <HowlSkeleton key={i} />)
+        ) : items.length === 0 ? (
+          <div className="glass-card rounded-3xl p-10 text-center text-muted-foreground">
+            <p className="font-display text-lg text-foreground">The forest is quiet…</p>
+            <p className="mt-1 text-sm">Be the first wolf to howl.</p>
+          </div>
+        ) : (
+          items.map((h) => (
+            <HowlCard key={h.id} howl={h} onChanged={load} onDeleted={load} />
+          ))
+        )}
       </div>
     </AppShell>
   );
