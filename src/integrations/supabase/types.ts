@@ -14,6 +14,170 @@ export type Database = {
   }
   public: {
     Tables: {
+      howl_echoes: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          howl_id: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          howl_id: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          howl_id?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "howl_echoes_howl_id_fkey"
+            columns: ["howl_id"]
+            isOneToOne: false
+            referencedRelation: "howls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      howl_likes: {
+        Row: {
+          created_at: string
+          howl_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          howl_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          howl_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "howl_likes_howl_id_fkey"
+            columns: ["howl_id"]
+            isOneToOne: false
+            referencedRelation: "howls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      howl_media: {
+        Row: {
+          created_at: string
+          howl_id: string
+          id: string
+          media_type: string
+          position: number
+          storage_path: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          howl_id: string
+          id?: string
+          media_type: string
+          position?: number
+          storage_path: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          howl_id?: string
+          id?: string
+          media_type?: string
+          position?: number
+          storage_path?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "howl_media_howl_id_fkey"
+            columns: ["howl_id"]
+            isOneToOne: false
+            referencedRelation: "howls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      howl_rehowls: {
+        Row: {
+          created_at: string
+          howl_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          howl_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          howl_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "howl_rehowls_howl_id_fkey"
+            columns: ["howl_id"]
+            isOneToOne: false
+            referencedRelation: "howls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      howls: {
+        Row: {
+          author_id: string
+          content: string | null
+          created_at: string
+          echo_count: number
+          edited: boolean
+          howl_count: number
+          id: string
+          rehowl_count: number
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          author_id: string
+          content?: string | null
+          created_at?: string
+          echo_count?: number
+          edited?: boolean
+          howl_count?: number
+          id?: string
+          rehowl_count?: number
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          author_id?: string
+          content?: string | null
+          created_at?: string
+          echo_count?: number
+          edited?: boolean
+          howl_count?: number
+          id?: string
+          rehowl_count?: number
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -61,7 +225,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      bump_howl_counter: {
+        Args: { _col: string; _delta: number; _howl: string }
+        Returns: undefined
+      }
+      increment_howl_view: { Args: { _howl: string }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never
