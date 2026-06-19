@@ -108,6 +108,56 @@ export async function fetchSuggestedPack(limit = 5): Promise<ProfileSummary[]> {
   return (data as ProfileSummary[]) ?? [];
 }
 
+export async function fetchFollowingIds(userId: string): Promise<string[]> {
+  const { data } = await supabase.from("follows").select("following_id").eq("follower_id", userId);
+  return (data ?? []).map((r) => r.following_id);
+}
+
+async function fetchProfilesByIds(ids: string[]): Promise<ProfileSummary[]> {
+  if (ids.length === 0) return [];
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, username, display_name, avatar_url, bio, followers_count, following_count")
+    .in("id", ids);
+  return (data as ProfileSummary[]) ?? [];
+}
+
+export async function fetchFollowers(userId: string): Promise<ProfileSummary[]> {
+  const { data } = await supabase
+    .from("follows")
+    .select("follower_id, created_at")
+    .eq("following_id", userId)
+    .order("created_at", { ascending: false });
+  const ids = (data ?? []).map((r) => r.follower_id);
+  const profiles = await fetchProfilesByIds(ids);
+  const map = new Map(profiles.map((p) => [p.id, p]));
+  return ids.map((id) => map.get(id)).filter(Boolean) as ProfileSummary[];
+}
+
+export async function fetchFollowing(userId: string): Promise<ProfileSummary[]> {
+  const { data } = await supabase
+    .from("follows")
+    .select("following_id, created_at")
+    .eq("follower_id", userId)
+    .order("created_at", { ascending: false });
+  const ids = (data ?? []).map((r) => r.following_id);
+  const profiles = await fetchProfilesByIds(ids);
+  const map = new Map(profiles.map((p) => [p.id, p]));
+  return ids.map((id) => map.get(id)).filter(Boolean) as ProfileSummary[];
+}
+
+export async function searchProfiles(q: string, limit = 20): Promise<ProfileSummary[]> {
+  const term = q.trim();
+  if (!term) return [];
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, username, display_name, avatar_url, bio, followers_count, following_count")
+    .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
+    .order("followers_count", { ascending: false })
+    .limit(limit);
+  return (data as ProfileSummary[]) ?? [];
+}
+
 export async function fetchLikedHowls(userId: string): Promise<HowlRecord[]> {
   const { data: likes } = await supabase
     .from("howl_likes")

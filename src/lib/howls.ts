@@ -108,7 +108,7 @@ export async function fetchMediaHowls(authorId: string): Promise<HowlRecord[]> {
   return fetchHowlsByIds(ids);
 }
 
-async function hydrateHowls(data: any[]): Promise<HowlRecord[]> {
+export async function hydrateHowls(data: any[]): Promise<HowlRecord[]> {
   const userId = (await supabase.auth.getUser()).data.user?.id;
   const ids = (data ?? []).map((d) => d.id);
   const authorIds = Array.from(new Set((data ?? []).map((d) => d.author_id)));
