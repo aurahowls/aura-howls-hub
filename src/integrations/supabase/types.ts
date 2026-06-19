@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+        }
+        Relationships: []
+      }
       howl_echoes: {
         Row: {
           author_id: string
@@ -186,6 +204,8 @@ export type Database = {
           created_at: string
           display_name: string | null
           email: string | null
+          followers_count: number
+          following_count: number
           id: string
           location: string | null
           updated_at: string
@@ -199,6 +219,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          followers_count?: number
+          following_count?: number
           id: string
           location?: string | null
           updated_at?: string
@@ -212,6 +234,8 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           email?: string | null
+          followers_count?: number
+          following_count?: number
           id?: string
           location?: string | null
           updated_at?: string
