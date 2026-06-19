@@ -2,12 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { HowlCard, HowlSkeleton } from "@/components/HowlCard";
 import { Button } from "@/components/ui/button";
-import { MapPin, CalendarDays, Link2, UserPlus, Users } from "lucide-react";
+import { MapPin, CalendarDays, Link2, Users } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchFeed, fetchMediaHowls, type HowlRecord } from "@/lib/howls";
-import { fetchLikedHowls, fetchSuggestedPack, resolveAvatar, resolveBanner, toggleFollow, type ProfileSummary } from "@/lib/profiles";
-import { toast } from "sonner";
+import { fetchLikedHowls, fetchSuggestedPack, resolveAvatar, resolveBanner, type ProfileSummary } from "@/lib/profiles";
+import { FollowButton } from "@/components/FollowButton";
 
 export const Route = createFileRoute("/_authenticated/profile/")({
   component: ProfilePage,
@@ -23,8 +23,6 @@ function ProfilePage() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [banner, setBanner] = useState<string | null>(null);
   const [suggested, setSuggested] = useState<ProfileSummary[]>([]);
-  const [followBusy, setFollowBusy] = useState<Record<string, boolean>>({});
-  const [followed, setFollowed] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     void (async () => {
@@ -50,24 +48,6 @@ function ProfilePage() {
   useEffect(() => {
     void (async () => setSuggested(await fetchSuggestedPack(5)))();
   }, [user?.id]);
-
-  async function handleFollow(p: ProfileSummary) {
-    setFollowBusy((s) => ({ ...s, [p.id]: true }));
-    try {
-      const isFollowed = followed.has(p.id);
-      await toggleFollow(p.id, isFollowed);
-      setFollowed((s) => {
-        const next = new Set(s);
-        if (isFollowed) next.delete(p.id);
-        else next.add(p.id);
-        return next;
-      });
-    } catch (e: any) {
-      toast.error(e.message ?? "Could not update pack");
-    } finally {
-      setFollowBusy((s) => ({ ...s, [p.id]: false }));
-    }
-  }
 
   const displayName = profile?.display_name ?? profile?.username ?? "Wolf";
   const handle = profile?.username ?? "wolf";
@@ -112,8 +92,14 @@ function ProfilePage() {
               <span className="flex items-center gap-1"><CalendarDays className="h-4 w-4" /> Joined {joined}</span>
             </div>
             <div className="mt-4 flex gap-6 text-sm">
-              <span><span className="font-bold text-foreground">{profile?.following_count ?? 0}</span> <span className="text-muted-foreground">Following Pack</span></span>
-              <span><span className="font-bold text-foreground">{profile?.followers_count ?? 0}</span> <span className="text-muted-foreground">Pack Members</span></span>
+              <Link to="/pack/following" className="hover:text-primary">
+                <span className="font-bold text-foreground">{profile?.following_count ?? 0}</span>{" "}
+                <span className="text-muted-foreground">Following Pack</span>
+              </Link>
+              <Link to="/pack" className="hover:text-primary">
+                <span className="font-bold text-foreground">{profile?.followers_count ?? 0}</span>{" "}
+                <span className="text-muted-foreground">Pack Members</span>
+              </Link>
             </div>
           </div>
         </div>
@@ -154,39 +140,32 @@ function ProfilePage() {
       </div>
 
       <section className="glass-card mt-8 rounded-3xl p-5">
-        <h3 className="mb-4 flex items-center gap-2 font-display text-lg font-bold">
-          <Users className="h-4 w-4 text-primary" /> Suggested Pack Members
-        </h3>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="flex items-center gap-2 font-display text-lg font-bold">
+            <Users className="h-4 w-4 text-primary" /> Suggested Pack Members
+          </h3>
+          <Link to="/pack/suggested" className="text-xs font-medium text-primary hover:underline">
+            See all
+          </Link>
+        </div>
         {suggested.length === 0 ? (
           <p className="text-sm text-muted-foreground">No suggestions right now — the woods are quiet.</p>
         ) : (
           <ul className="space-y-3">
-            {suggested.map((p) => {
-              const isFollowed = followed.has(p.id);
-              return (
-                <li key={p.id} className="flex items-center gap-3">
-                  <img
-                    src={p.avatar_url ?? `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(p.username)}`}
-                    alt=""
-                    className="h-10 w-10 rounded-full ring-1 ring-primary/30 object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{p.display_name ?? p.username}</p>
-                    <p className="truncate text-xs text-muted-foreground">@{p.username} · {p.followers_count} pack</p>
-                  </div>
-                  <Button
-                    size="sm"
-                    onClick={() => handleFollow(p)}
-                    disabled={followBusy[p.id]}
-                    variant={isFollowed ? "outline" : "default"}
-                    className={isFollowed ? "rounded-full" : "btn-gold rounded-full"}
-                  >
-                    <UserPlus className="h-3.5 w-3.5" />
-                    {isFollowed ? "Following" : "Follow"}
-                  </Button>
-                </li>
-              );
-            })}
+            {suggested.map((p) => (
+              <li key={p.id} className="flex items-center gap-3">
+                <img
+                  src={p.avatar_url ?? `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(p.username)}`}
+                  alt=""
+                  className="h-10 w-10 rounded-full ring-1 ring-primary/30 object-cover"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{p.display_name ?? p.username}</p>
+                  <p className="truncate text-xs text-muted-foreground">@{p.username} · {p.followers_count} pack</p>
+                </div>
+                <FollowButton targetId={p.id} initialFollowing={false} />
+              </li>
+            ))}
           </ul>
         )}
       </section>
