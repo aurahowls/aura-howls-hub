@@ -9,7 +9,7 @@ import { fetchFeed, fetchMediaHowls, type HowlRecord } from "@/lib/howls";
 import { fetchLikedHowls, fetchSuggestedPack, resolveAvatar, resolveBanner, toggleFollow, type ProfileSummary } from "@/lib/profiles";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/profile")({
+export const Route = createFileRoute("/_authenticated/profile/")({
   component: ProfilePage,
 });
 
