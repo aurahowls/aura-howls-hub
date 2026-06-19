@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, Bell, Mail, Search, User, Settings, LogOut, Menu, X, Sparkles, TrendingUp } from "lucide-react";
+import { Home, Bell, Mail, Search, User, Settings, LogOut, Menu, X, Sparkles, TrendingUp, Users } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Logo, LogoWordmark } from "./Logo";
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ const nav = [
   { to: "/search", label: "Search", icon: Search },
   { to: "/notifications", label: "Wolf Alerts", icon: Bell, badge: 4 },
   { to: "/messages", label: "Pack DMs", icon: Mail, badge: 2 },
+  { to: "/pack", label: "Pack", icon: Users },
   { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
