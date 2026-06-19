@@ -79,7 +79,36 @@ export async function fetchFeed(opts?: { authorId?: string }): Promise<HowlRecor
   if (opts?.authorId) query = query.eq("author_id", opts.authorId);
   const { data, error } = await query;
   if (error) throw error;
+  return hydrateHowls(data ?? []);
+}
 
+export async function fetchHowlsByIds(ids: string[]): Promise<HowlRecord[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase
+    .from("howls")
+    .select(
+      `id, author_id, content, view_count, howl_count, echo_count, rehowl_count, edited, created_at, updated_at,
+       media:howl_media ( id, storage_path, media_type, position )`,
+    )
+    .in("id", ids);
+  if (error) throw error;
+  const order = new Map(ids.map((id, i) => [id, i]));
+  const sorted = (data ?? []).slice().sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+  return hydrateHowls(sorted);
+}
+
+export async function fetchMediaHowls(authorId: string): Promise<HowlRecord[]> {
+  const { data: media } = await supabase
+    .from("howl_media")
+    .select("howl_id, howls!inner(author_id, created_at)")
+    .eq("howls.author_id", authorId)
+    .order("created_at", { foreignTable: "howls", ascending: false })
+    .limit(80);
+  const ids = Array.from(new Set((media ?? []).map((m: any) => m.howl_id)));
+  return fetchHowlsByIds(ids);
+}
+
+async function hydrateHowls(data: any[]): Promise<HowlRecord[]> {
   const userId = (await supabase.auth.getUser()).data.user?.id;
   const ids = (data ?? []).map((d) => d.id);
   const authorIds = Array.from(new Set((data ?? []).map((d) => d.author_id)));
