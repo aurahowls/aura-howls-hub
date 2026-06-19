@@ -15,11 +15,15 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedPackRouteImport } from './routes/_authenticated/pack'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile.index'
+import { Route as AuthenticatedPackIndexRouteImport } from './routes/_authenticated/pack.index'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
+import { Route as AuthenticatedPackSuggestedRouteImport } from './routes/_authenticated/pack.suggested'
+import { Route as AuthenticatedPackFollowingRouteImport } from './routes/_authenticated/pack.following'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -50,6 +54,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPackRoute = AuthenticatedPackRouteImport.update({
+  id: '/pack',
+  path: '/pack',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
@@ -72,11 +81,28 @@ const AuthenticatedProfileIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedProfileRoute,
   } as any)
+const AuthenticatedPackIndexRoute = AuthenticatedPackIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedPackRoute,
+} as any)
 const AuthenticatedProfileEditRoute =
   AuthenticatedProfileEditRouteImport.update({
     id: '/edit',
     path: '/edit',
     getParentRoute: () => AuthenticatedProfileRoute,
+  } as any)
+const AuthenticatedPackSuggestedRoute =
+  AuthenticatedPackSuggestedRouteImport.update({
+    id: '/suggested',
+    path: '/suggested',
+    getParentRoute: () => AuthenticatedPackRoute,
+  } as any)
+const AuthenticatedPackFollowingRoute =
+  AuthenticatedPackFollowingRouteImport.update({
+    id: '/following',
+    path: '/following',
+    getParentRoute: () => AuthenticatedPackRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -85,10 +111,14 @@ export interface FileRoutesByFullPath {
   '/home': typeof AuthenticatedHomeRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/pack': typeof AuthenticatedPackRouteWithChildren
   '/profile': typeof AuthenticatedProfileRouteWithChildren
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/pack/following': typeof AuthenticatedPackFollowingRoute
+  '/pack/suggested': typeof AuthenticatedPackSuggestedRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/pack/': typeof AuthenticatedPackIndexRoute
   '/profile/': typeof AuthenticatedProfileIndexRoute
 }
 export interface FileRoutesByTo {
@@ -99,7 +129,10 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/pack/following': typeof AuthenticatedPackFollowingRoute
+  '/pack/suggested': typeof AuthenticatedPackSuggestedRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/pack': typeof AuthenticatedPackIndexRoute
   '/profile': typeof AuthenticatedProfileIndexRoute
 }
 export interface FileRoutesById {
@@ -110,10 +143,14 @@ export interface FileRoutesById {
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/pack': typeof AuthenticatedPackRouteWithChildren
   '/_authenticated/profile': typeof AuthenticatedProfileRouteWithChildren
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/pack/following': typeof AuthenticatedPackFollowingRoute
+  '/_authenticated/pack/suggested': typeof AuthenticatedPackSuggestedRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/_authenticated/pack/': typeof AuthenticatedPackIndexRoute
   '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
 }
 export interface FileRouteTypes {
@@ -124,10 +161,14 @@ export interface FileRouteTypes {
     | '/home'
     | '/messages'
     | '/notifications'
+    | '/pack'
     | '/profile'
     | '/search'
     | '/settings'
+    | '/pack/following'
+    | '/pack/suggested'
     | '/profile/edit'
+    | '/pack/'
     | '/profile/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -138,7 +179,10 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/search'
     | '/settings'
+    | '/pack/following'
+    | '/pack/suggested'
     | '/profile/edit'
+    | '/pack'
     | '/profile'
   id:
     | '__root__'
@@ -148,10 +192,14 @@ export interface FileRouteTypes {
     | '/_authenticated/home'
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
+    | '/_authenticated/pack'
     | '/_authenticated/profile'
     | '/_authenticated/search'
     | '/_authenticated/settings'
+    | '/_authenticated/pack/following'
+    | '/_authenticated/pack/suggested'
     | '/_authenticated/profile/edit'
+    | '/_authenticated/pack/'
     | '/_authenticated/profile/'
   fileRoutesById: FileRoutesById
 }
@@ -205,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/pack': {
+      id: '/_authenticated/pack'
+      path: '/pack'
+      fullPath: '/pack'
+      preLoaderRoute: typeof AuthenticatedPackRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/notifications': {
       id: '/_authenticated/notifications'
       path: '/notifications'
@@ -233,6 +288,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileIndexRouteImport
       parentRoute: typeof AuthenticatedProfileRoute
     }
+    '/_authenticated/pack/': {
+      id: '/_authenticated/pack/'
+      path: '/'
+      fullPath: '/pack/'
+      preLoaderRoute: typeof AuthenticatedPackIndexRouteImport
+      parentRoute: typeof AuthenticatedPackRoute
+    }
     '/_authenticated/profile/edit': {
       id: '/_authenticated/profile/edit'
       path: '/edit'
@@ -240,8 +302,37 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileEditRouteImport
       parentRoute: typeof AuthenticatedProfileRoute
     }
+    '/_authenticated/pack/suggested': {
+      id: '/_authenticated/pack/suggested'
+      path: '/suggested'
+      fullPath: '/pack/suggested'
+      preLoaderRoute: typeof AuthenticatedPackSuggestedRouteImport
+      parentRoute: typeof AuthenticatedPackRoute
+    }
+    '/_authenticated/pack/following': {
+      id: '/_authenticated/pack/following'
+      path: '/following'
+      fullPath: '/pack/following'
+      preLoaderRoute: typeof AuthenticatedPackFollowingRouteImport
+      parentRoute: typeof AuthenticatedPackRoute
+    }
   }
 }
+
+interface AuthenticatedPackRouteChildren {
+  AuthenticatedPackFollowingRoute: typeof AuthenticatedPackFollowingRoute
+  AuthenticatedPackSuggestedRoute: typeof AuthenticatedPackSuggestedRoute
+  AuthenticatedPackIndexRoute: typeof AuthenticatedPackIndexRoute
+}
+
+const AuthenticatedPackRouteChildren: AuthenticatedPackRouteChildren = {
+  AuthenticatedPackFollowingRoute: AuthenticatedPackFollowingRoute,
+  AuthenticatedPackSuggestedRoute: AuthenticatedPackSuggestedRoute,
+  AuthenticatedPackIndexRoute: AuthenticatedPackIndexRoute,
+}
+
+const AuthenticatedPackRouteWithChildren =
+  AuthenticatedPackRoute._addFileChildren(AuthenticatedPackRouteChildren)
 
 interface AuthenticatedProfileRouteChildren {
   AuthenticatedProfileEditRoute: typeof AuthenticatedProfileEditRoute
@@ -260,6 +351,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedPackRoute: typeof AuthenticatedPackRouteWithChildren
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRouteWithChildren
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -269,6 +361,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedPackRoute: AuthenticatedPackRouteWithChildren,
   AuthenticatedProfileRoute: AuthenticatedProfileRouteWithChildren,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
