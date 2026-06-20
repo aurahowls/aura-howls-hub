@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { trending } from "@/lib/mock-data";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useQueryClient } from "@tanstack/react-query";
 
 const nav = [
   { to: "/home", label: "Den", icon: Home },
   { to: "/search", label: "Search", icon: Search },
-  { to: "/notifications", label: "Wolf Alerts", icon: Bell, badge: 4 },
-  { to: "/messages", label: "Pack DMs", icon: Mail, badge: 2 },
+  { to: "/notifications", label: "Wolf Alerts", icon: Bell, badgeKey: "alerts" as const },
+  { to: "/messages", label: "Pack DMs", icon: Mail, badgeKey: "dms" as const },
   { to: "/pack", label: "Pack", icon: Users },
   { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
@@ -25,6 +26,8 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { profile, user } = useCurrentUser();
+  const { alerts, dms } = useUnreadCounts();
+  const badges: Record<string, number> = { alerts, dms };
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -72,6 +75,7 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
             {nav.map((item) => {
               const active = pathname === item.to;
               const Icon = item.icon;
+              const badge = "badgeKey" in item && item.badgeKey ? badges[item.badgeKey] : 0;
               return (
                 <Link
                   key={item.to}
@@ -86,9 +90,9 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
                 >
                   <span className="relative">
                     <Icon className={cn("h-5 w-5", active && "text-primary")} />
-                    {item.badge ? (
+                    {badge > 0 ? (
                       <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground animate-howl-pulse">
-                        {item.badge}
+                        {badge > 99 ? "99+" : badge}
                       </span>
                     ) : null}
                   </span>
