@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          last_message_preview: string | null
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          last_message_preview?: string | null
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          last_message_preview?: string | null
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -196,6 +223,127 @@ export type Database = {
         }
         Relationships: []
       }
+      message_reads: {
+        Row: {
+          conversation_id: string
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          media_path: string | null
+          media_type: string | null
+          sender_id: string
+        }
+        Insert: {
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          media_path?: string | null
+          media_type?: string | null
+          sender_id: string
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          media_path?: string | null
+          media_type?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          conversation_id: string | null
+          created_at: string
+          echo_id: string | null
+          howl_id: string | null
+          id: string
+          message_id: string | null
+          preview: string | null
+          read: boolean
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          echo_id?: string | null
+          howl_id?: string | null
+          id?: string
+          message_id?: string | null
+          preview?: string | null
+          read?: boolean
+          type: Database["public"]["Enums"]["notification_type"]
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          echo_id?: string | null
+          howl_id?: string | null
+          id?: string
+          message_id?: string | null
+          preview?: string | null
+          read?: boolean
+          type?: Database["public"]["Enums"]["notification_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_echo_id_fkey"
+            columns: ["echo_id"]
+            isOneToOne: false
+            referencedRelation: "howl_echoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_howl_id_fkey"
+            columns: ["howl_id"]
+            isOneToOne: false
+            referencedRelation: "howls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -256,7 +404,13 @@ export type Database = {
       increment_howl_view: { Args: { _howl: string }; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      notification_type:
+        | "follow"
+        | "howl_like"
+        | "echo"
+        | "rehowl"
+        | "mention"
+        | "dm"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -383,6 +537,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      notification_type: [
+        "follow",
+        "howl_like",
+        "echo",
+        "rehowl",
+        "mention",
+        "dm",
+      ],
+    },
   },
 } as const
