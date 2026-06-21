@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Image as ImageIcon, Film, X, Sparkles, Loader2 } from "lucide-react";
+import { Image as ImageIcon, Film, X, Sparkles, Loader2, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import {
@@ -9,6 +9,8 @@ import {
   type UploadProgress,
 } from "@/lib/howls";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { createPollForHowl } from "@/lib/polls";
+import { supabase } from "@/integrations/supabase/client";
 
 const MAX_IMAGES = 4;
 
@@ -19,6 +21,9 @@ export function HowlComposer({ onPosted }: { onPosted?: () => void }) {
   const [previews, setPreviews] = useState<{ url: string; type: "image" | "video" }[]>([]);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<UploadProgress | null>(null);
+  const [pollOn, setPollOn] = useState(false);
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [pollDurationH, setPollDurationH] = useState<number>(24);
   const imgInput = useRef<HTMLInputElement>(null);
   const vidInput = useRef<HTMLInputElement>(null);
 
@@ -33,6 +38,8 @@ export function HowlComposer({ onPosted }: { onPosted?: () => void }) {
     setFiles([]);
     setPreviews([]);
     setProgress(null);
+    setPollOn(false);
+    setPollOptions(["", ""]);
   };
 
   const onPickImages = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,14 +88,33 @@ export function HowlComposer({ onPosted }: { onPosted?: () => void }) {
 
   const submit = async () => {
     if (busy) return;
-    if (!content.trim() && files.length === 0) {
+    if (!content.trim() && files.length === 0 && !pollOn) {
       toast.error("Say something or attach media");
       return;
+    }
+    if (pollOn) {
+      const cleaned = pollOptions.map((o) => o.trim()).filter(Boolean);
+      if (cleaned.length < 2) {
+        toast.error("Poll needs at least 2 options");
+        return;
+      }
     }
     setBusy(true);
     setProgress(null);
     try {
-      await createHowl({ content, files, onProgress: setProgress });
+      const howl = await createHowl({ content, files, onProgress: setProgress });
+      if (pollOn) {
+        const cleaned = pollOptions.map((o) => o.trim()).filter(Boolean);
+        const expires = pollDurationH > 0
+          ? new Date(Date.now() + pollDurationH * 3600 * 1000).toISOString()
+          : null;
+        try {
+          await createPollForHowl(howl.id, cleaned, expires);
+        } catch (pe: any) {
+          await supabase.from("howls").delete().eq("id", howl.id);
+          throw pe;
+        }
+      }
       toast.success("Howl sent 🌕");
       reset();
       onPosted?.();
@@ -161,6 +187,68 @@ export function HowlComposer({ onPosted }: { onPosted?: () => void }) {
             </div>
           )}
 
+          {pollOn && (
+            <div className="mt-3 space-y-2 rounded-2xl border border-border bg-card/40 p-3">
+              {pollOptions.map((o, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <input
+                    value={o}
+                    onChange={(e) =>
+                      setPollOptions((cur) => cur.map((v, idx) => (idx === i ? e.target.value : v)))
+                    }
+                    maxLength={80}
+                    placeholder={`Option ${i + 1}`}
+                    className="flex-1 rounded-lg border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary/50"
+                  />
+                  {pollOptions.length > 2 && (
+                    <button
+                      type="button"
+                      onClick={() => setPollOptions((cur) => cur.filter((_, idx) => idx !== i))}
+                      className="rounded-full p-1 text-muted-foreground hover:text-destructive"
+                      aria-label="Remove option"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <div className="flex items-center justify-between text-xs">
+                {pollOptions.length < 4 ? (
+                  <button
+                    type="button"
+                    onClick={() => setPollOptions((cur) => [...cur, ""])}
+                    className="text-primary hover:underline"
+                  >
+                    + Add option
+                  </button>
+                ) : (
+                  <span className="text-muted-foreground">Max 4 options</span>
+                )}
+                <label className="flex items-center gap-2 text-muted-foreground">
+                  Ends in
+                  <select
+                    value={pollDurationH}
+                    onChange={(e) => setPollDurationH(Number(e.target.value))}
+                    className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                  >
+                    <option value={1}>1 hour</option>
+                    <option value={24}>1 day</option>
+                    <option value={72}>3 days</option>
+                    <option value={168}>1 week</option>
+                    <option value={0}>No expiry</option>
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setPollOn(false)}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  Remove poll
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="mt-3 flex items-center justify-between">
             <div className="flex gap-1 text-primary">
               <input
@@ -195,6 +283,15 @@ export function HowlComposer({ onPosted }: { onPosted?: () => void }) {
                 aria-label="Add video"
               >
                 <Film className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setPollOn((v) => !v)}
+                disabled={busy}
+                className={`rounded-full p-2 hover:bg-primary/10 disabled:opacity-40 ${pollOn ? "bg-primary/15 text-primary" : ""}`}
+                aria-label="Add poll"
+              >
+                <BarChart3 className="h-4 w-4" />
               </button>
               <button
                 type="button"
