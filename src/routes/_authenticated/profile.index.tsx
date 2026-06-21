@@ -6,14 +6,15 @@ import { MapPin, CalendarDays, Link2, Users } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchFeed, fetchMediaHowls, type HowlRecord } from "@/lib/howls";
-import { fetchLikedHowls, fetchSuggestedPack, resolveAvatar, resolveBanner, type ProfileSummary } from "@/lib/profiles";
+import { fetchLikedHowls, fetchRehowledHowls, fetchSuggestedPack, resolveAvatar, resolveBanner, type ProfileSummary } from "@/lib/profiles";
 import { FollowButton } from "@/components/FollowButton";
+import { MaybeVerified } from "@/components/VerifiedBadge";
 
 export const Route = createFileRoute("/_authenticated/profile/")({
   component: ProfilePage,
 });
 
-type Tab = "howls" | "media" | "likes";
+type Tab = "howls" | "media" | "likes" | "rehowls";
 
 function ProfilePage() {
   const { user, profile, loading } = useCurrentUser();
@@ -37,7 +38,8 @@ function ProfilePage() {
     try {
       if (which === "howls") setHowls(await fetchFeed({ authorId: user.id }));
       else if (which === "media") setHowls(await fetchMediaHowls(user.id));
-      else setHowls(await fetchLikedHowls(user.id));
+      else if (which === "likes") setHowls(await fetchLikedHowls(user.id));
+      else setHowls(await fetchRehowledHowls(user.id));
     } finally {
       setHowlsLoading(false);
     }
@@ -79,7 +81,10 @@ function ProfilePage() {
             </Link>
           </div>
           <div className="mt-3">
-            <h1 className="font-display text-2xl font-bold">{loading ? "…" : displayName}</h1>
+            <h1 className="flex items-center gap-2 font-display text-2xl font-bold">
+              {loading ? "…" : displayName}
+              <MaybeVerified verified={profile?.is_verified} size={18} />
+            </h1>
             <p className="text-muted-foreground">@{handle}</p>
             <p className="mt-3 text-foreground/90">{bio}</p>
             <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
@@ -110,6 +115,7 @@ function ProfilePage() {
           { id: "howls", label: "Howls" },
           { id: "media", label: "Media" },
           { id: "likes", label: "Likes" },
+          { id: "rehowls", label: "Rehowls" },
         ] as { id: Tab; label: string }[]).map((t) => (
           <button
             key={t.id}
@@ -131,6 +137,7 @@ function ProfilePage() {
             {tab === "howls" && "No Howls yet. Share your first one from the Den."}
             {tab === "media" && "No media Howls yet — try posting an image or video."}
             {tab === "likes" && "No 🐺 Howls yet — like a post to see it here."}
+            {tab === "rehowls" && "You haven't rehowled anything yet."}
           </div>
         ) : (
           howls.map((h) => (

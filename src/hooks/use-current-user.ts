@@ -15,6 +15,7 @@ export type Profile = {
   created_at: string;
   followers_count: number;
   following_count: number;
+  is_verified: boolean;
 };
 
 export function useCurrentUser() {

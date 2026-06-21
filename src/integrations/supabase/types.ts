@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookmarks: {
+        Row: {
+          created_at: string
+          howl_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          howl_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          howl_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_howl_id_fkey"
+            columns: ["howl_id"]
+            isOneToOne: false
+            referencedRelation: "howls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           created_at: string
@@ -59,6 +85,27 @@ export type Database = {
         }
         Relationships: []
       }
+      hashtags: {
+        Row: {
+          created_at: string
+          howl_count: number
+          last_used_at: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          howl_count?: number
+          last_used_at?: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          howl_count?: number
+          last_used_at?: string
+          tag?: string
+        }
+        Relationships: []
+      }
       howl_echoes: {
         Row: {
           author_id: string
@@ -87,6 +134,32 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "howl_echoes_howl_id_fkey"
+            columns: ["howl_id"]
+            isOneToOne: false
+            referencedRelation: "howls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      howl_hashtags: {
+        Row: {
+          created_at: string
+          howl_id: string
+          tag: string
+        }
+        Insert: {
+          created_at?: string
+          howl_id: string
+          tag: string
+        }
+        Update: {
+          created_at?: string
+          howl_id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "howl_hashtags_howl_id_fkey"
             columns: ["howl_id"]
             isOneToOne: false
             referencedRelation: "howls"
@@ -194,6 +267,7 @@ export type Database = {
           howl_count: number
           id: string
           rehowl_count: number
+          saved_count: number
           updated_at: string
           view_count: number
         }
@@ -206,6 +280,7 @@ export type Database = {
           howl_count?: number
           id?: string
           rehowl_count?: number
+          saved_count?: number
           updated_at?: string
           view_count?: number
         }
@@ -218,6 +293,7 @@ export type Database = {
           howl_count?: number
           id?: string
           rehowl_count?: number
+          saved_count?: number
           updated_at?: string
           view_count?: number
         }
@@ -344,6 +420,103 @@ export type Database = {
           },
         ]
       }
+      poll_options: {
+        Row: {
+          id: string
+          idx: number
+          poll_id: string
+          text: string
+          vote_count: number
+        }
+        Insert: {
+          id?: string
+          idx: number
+          poll_id: string
+          text: string
+          vote_count?: number
+        }
+        Update: {
+          id?: string
+          idx?: number
+          poll_id?: string
+          text?: string
+          vote_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          option_id: string
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          option_id?: string
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          howl_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          howl_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          howl_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polls_howl_id_fkey"
+            columns: ["howl_id"]
+            isOneToOne: true
+            referencedRelation: "howls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -355,6 +528,7 @@ export type Database = {
           followers_count: number
           following_count: number
           id: string
+          is_verified: boolean
           location: string | null
           updated_at: string
           username: string
@@ -370,6 +544,7 @@ export type Database = {
           followers_count?: number
           following_count?: number
           id: string
+          is_verified?: boolean
           location?: string | null
           updated_at?: string
           username: string
@@ -385,10 +560,86 @@ export type Database = {
           followers_count?: number
           following_count?: number
           id?: string
+          is_verified?: boolean
           location?: string | null
           updated_at?: string
           username?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      recent_searches: {
+        Row: {
+          created_at: string
+          id: string
+          query: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          query: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          query?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      verification_requests: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["verification_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_status"]
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -401,9 +652,17 @@ export type Database = {
         Args: { _col: string; _delta: number; _howl: string }
         Returns: undefined
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       increment_howl_view: { Args: { _howl: string }; Returns: undefined }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       notification_type:
         | "follow"
         | "howl_like"
@@ -411,6 +670,7 @@ export type Database = {
         | "rehowl"
         | "mention"
         | "dm"
+      verification_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -538,6 +798,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       notification_type: [
         "follow",
         "howl_like",
@@ -546,6 +807,7 @@ export const Constants = {
         "mention",
         "dm",
       ],
+      verification_status: ["pending", "approved", "rejected"],
     },
   },
 } as const

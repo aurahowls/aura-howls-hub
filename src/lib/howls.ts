@@ -13,6 +13,7 @@ export type HowlAuthor = {
   username: string | null;
   display_name: string | null;
   avatar_url: string | null;
+  is_verified?: boolean | null;
 };
 
 export type HowlRecord = {
@@ -118,7 +119,7 @@ export async function hydrateHowls(data: any[]): Promise<HowlRecord[]> {
   if (authorIds.length) {
     const { data: profs } = await supabase
       .from("profiles")
-      .select("id, username, display_name, avatar_url")
+      .select("id, username, display_name, avatar_url, is_verified")
       .in("id", authorIds);
     for (const p of profs ?? []) authorMap.set(p.id, p as HowlAuthor);
   }
@@ -321,7 +322,7 @@ export async function fetchEchoes(howlId: string): Promise<EchoRecord[]> {
   if (ids.length) {
     const { data: profs } = await supabase
       .from("profiles")
-      .select("id, username, display_name, avatar_url")
+      .select("id, username, display_name, avatar_url, is_verified")
       .in("id", ids);
     for (const p of profs ?? []) map.set(p.id, p as HowlAuthor);
   }

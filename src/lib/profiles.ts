@@ -9,6 +9,7 @@ export type ProfileSummary = {
   bio: string | null;
   followers_count: number;
   following_count: number;
+  is_verified?: boolean;
 };
 
 const AVATAR_TTL = 60 * 60 * 24 * 365;
@@ -100,7 +101,7 @@ export async function fetchSuggestedPack(limit = 5): Promise<ProfileSummary[]> {
   }
   let q = supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, bio, followers_count, following_count")
+    .select("id, username, display_name, avatar_url, bio, followers_count, following_count, is_verified")
     .order("followers_count", { ascending: false })
     .limit(limit);
   if (exclude.length) q = q.not("id", "in", `(${exclude.join(",")})`);
@@ -117,7 +118,7 @@ async function fetchProfilesByIds(ids: string[]): Promise<ProfileSummary[]> {
   if (ids.length === 0) return [];
   const { data } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, bio, followers_count, following_count")
+    .select("id, username, display_name, avatar_url, bio, followers_count, following_count, is_verified")
     .in("id", ids);
   return (data as ProfileSummary[]) ?? [];
 }
@@ -151,7 +152,7 @@ export async function searchProfiles(q: string, limit = 20): Promise<ProfileSumm
   if (!term) return [];
   const { data } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, bio, followers_count, following_count")
+    .select("id, username, display_name, avatar_url, bio, followers_count, following_count, is_verified")
     .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
     .order("followers_count", { ascending: false })
     .limit(limit);
@@ -169,4 +170,34 @@ export async function fetchLikedHowls(userId: string): Promise<HowlRecord[]> {
   if (ids.length === 0) return [];
   const { fetchHowlsByIds } = await import("./howls");
   return fetchHowlsByIds(ids);
+}
+
+export async function fetchRehowledHowls(userId: string): Promise<HowlRecord[]> {
+  const { data } = await supabase
+    .from("howl_rehowls")
+    .select("howl_id, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  const ids = (data ?? []).map((r) => r.howl_id);
+  if (ids.length === 0) return [];
+  const { fetchHowlsByIds } = await import("./howls");
+  return fetchHowlsByIds(ids);
+}
+
+export async function fetchProfileByUsername(username: string): Promise<(ProfileSummary & {
+  banner_url: string | null;
+  bio: string | null;
+  location: string | null;
+  website: string | null;
+  created_at: string;
+}) | null> {
+  const { data } = await supabase
+    .from("profiles")
+    .select(
+      "id, username, display_name, avatar_url, banner_url, bio, location, website, created_at, followers_count, following_count, is_verified",
+    )
+    .eq("username", username.toLowerCase())
+    .maybeSingle();
+  return (data as any) ?? null;
 }
