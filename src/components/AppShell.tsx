@@ -1,21 +1,26 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, Bell, Mail, Search, User, Settings, LogOut, Menu, X, Sparkles, TrendingUp, Users } from "lucide-react";
+import { Home, Bell, Mail, Search, User, Settings, LogOut, Menu, X, Sparkles, Users, Bookmark, Flame, Film, BarChart2 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Logo, LogoWordmark } from "./Logo";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { trending } from "@/lib/mock-data";
+import { TrendingSidebar } from "./TrendingSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useQueryClient } from "@tanstack/react-query";
+import { MaybeVerified } from "./VerifiedBadge";
 
 const nav = [
   { to: "/home", label: "Den", icon: Home },
   { to: "/search", label: "Search", icon: Search },
+  { to: "/trending", label: "Trending", icon: Flame },
+  { to: "/reels", label: "Wolf Reels", icon: Film },
   { to: "/notifications", label: "Wolf Alerts", icon: Bell, badgeKey: "alerts" as const },
   { to: "/messages", label: "Pack DMs", icon: Mail, badgeKey: "dms" as const },
   { to: "/pack", label: "Pack", icon: Users },
+  { to: "/bookmarks", label: "Bookmarks", icon: Bookmark },
+  { to: "/analytics", label: "Analytics", icon: BarChart2 },
   { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
@@ -110,7 +115,10 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
           <div className="mt-6 flex items-center gap-3 rounded-2xl border border-border/60 bg-card/40 p-3 backdrop-blur">
             <img src={avatarUrl} alt="" className="h-10 w-10 rounded-full ring-1 ring-primary/40" />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">{displayName}</p>
+              <p className="flex items-center gap-1 truncate text-sm font-semibold">
+                <span className="truncate">{displayName}</span>
+                <MaybeVerified verified={profile?.is_verified} size={12} />
+              </p>
               <p className="truncate text-xs text-muted-foreground">@{handle}</p>
             </div>
             <button
@@ -133,20 +141,7 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
         {rightRail && (
           <aside className="hidden w-80 shrink-0 py-6 xl:block">
             <div className="sticky top-6 space-y-4">
-              <div className="glass-card rounded-3xl p-5">
-                <h3 className="mb-3 flex items-center gap-2 font-display text-lg font-bold">
-                  <TrendingUp className="h-4 w-4 text-primary" />
-                  Trending Howls
-                </h3>
-                <ul className="space-y-3">
-                  {trending.map((t) => (
-                    <li key={t.tag} className="cursor-pointer rounded-xl p-2 transition hover:bg-muted/50">
-                      <p className="font-semibold text-foreground">{t.tag}</p>
-                      <p className="text-xs text-muted-foreground">{t.howls}</p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <TrendingSidebar />
             </div>
           </aside>
         )}

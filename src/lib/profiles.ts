@@ -171,3 +171,33 @@ export async function fetchLikedHowls(userId: string): Promise<HowlRecord[]> {
   const { fetchHowlsByIds } = await import("./howls");
   return fetchHowlsByIds(ids);
 }
+
+export async function fetchRehowledHowls(userId: string): Promise<HowlRecord[]> {
+  const { data } = await supabase
+    .from("howl_rehowls")
+    .select("howl_id, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  const ids = (data ?? []).map((r) => r.howl_id);
+  if (ids.length === 0) return [];
+  const { fetchHowlsByIds } = await import("./howls");
+  return fetchHowlsByIds(ids);
+}
+
+export async function fetchProfileByUsername(username: string): Promise<(ProfileSummary & {
+  banner_url: string | null;
+  bio: string | null;
+  location: string | null;
+  website: string | null;
+  created_at: string;
+}) | null> {
+  const { data } = await supabase
+    .from("profiles")
+    .select(
+      "id, username, display_name, avatar_url, banner_url, bio, location, website, created_at, followers_count, following_count, is_verified",
+    )
+    .eq("username", username.toLowerCase())
+    .maybeSingle();
+  return (data as any) ?? null;
+}
