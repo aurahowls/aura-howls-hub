@@ -9,6 +9,7 @@ export type ProfileSummary = {
   bio: string | null;
   followers_count: number;
   following_count: number;
+  is_verified?: boolean;
 };
 
 const AVATAR_TTL = 60 * 60 * 24 * 365;
@@ -100,7 +101,7 @@ export async function fetchSuggestedPack(limit = 5): Promise<ProfileSummary[]> {
   }
   let q = supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, bio, followers_count, following_count")
+    .select("id, username, display_name, avatar_url, bio, followers_count, following_count, is_verified")
     .order("followers_count", { ascending: false })
     .limit(limit);
   if (exclude.length) q = q.not("id", "in", `(${exclude.join(",")})`);
@@ -117,7 +118,7 @@ async function fetchProfilesByIds(ids: string[]): Promise<ProfileSummary[]> {
   if (ids.length === 0) return [];
   const { data } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, bio, followers_count, following_count")
+    .select("id, username, display_name, avatar_url, bio, followers_count, following_count, is_verified")
     .in("id", ids);
   return (data as ProfileSummary[]) ?? [];
 }
@@ -151,7 +152,7 @@ export async function searchProfiles(q: string, limit = 20): Promise<ProfileSumm
   if (!term) return [];
   const { data } = await supabase
     .from("profiles")
-    .select("id, username, display_name, avatar_url, bio, followers_count, following_count")
+    .select("id, username, display_name, avatar_url, bio, followers_count, following_count, is_verified")
     .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
     .order("followers_count", { ascending: false })
     .limit(limit);
