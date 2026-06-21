@@ -12,18 +12,23 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedTrendingRouteImport } from './routes/_authenticated/trending'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
+import { Route as AuthenticatedReelsRouteImport } from './routes/_authenticated/reels'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPackRouteImport } from './routes/_authenticated/pack'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedBookmarksRouteImport } from './routes/_authenticated/bookmarks'
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile.index'
 import { Route as AuthenticatedPackIndexRouteImport } from './routes/_authenticated/pack.index'
+import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
 import { Route as AuthenticatedPackSuggestedRouteImport } from './routes/_authenticated/pack.suggested'
 import { Route as AuthenticatedPackFollowingRouteImport } from './routes/_authenticated/pack.following'
+import { Route as AuthenticatedHashtagTagRouteImport } from './routes/_authenticated/hashtag.$tag'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -39,6 +44,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedTrendingRoute = AuthenticatedTrendingRouteImport.update({
+  id: '/trending',
+  path: '/trending',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -47,6 +57,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReelsRoute = AuthenticatedReelsRouteImport.update({
+  id: '/reels',
+  path: '/reels',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -75,6 +90,11 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBookmarksRoute = AuthenticatedBookmarksRouteImport.update({
+  id: '/bookmarks',
+  path: '/bookmarks',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileIndexRoute =
   AuthenticatedProfileIndexRouteImport.update({
     id: '/',
@@ -85,6 +105,11 @@ const AuthenticatedPackIndexRoute = AuthenticatedPackIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AuthenticatedPackRoute,
+} as any)
+const AuthenticatedUUsernameRoute = AuthenticatedUUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedProfileEditRoute =
   AuthenticatedProfileEditRouteImport.update({
@@ -104,34 +129,49 @@ const AuthenticatedPackFollowingRoute =
     path: '/following',
     getParentRoute: () => AuthenticatedPackRoute,
   } as any)
+const AuthenticatedHashtagTagRoute = AuthenticatedHashtagTagRouteImport.update({
+  id: '/hashtag/$tag',
+  path: '/hashtag/$tag',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/home': typeof AuthenticatedHomeRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/pack': typeof AuthenticatedPackRouteWithChildren
   '/profile': typeof AuthenticatedProfileRouteWithChildren
+  '/reels': typeof AuthenticatedReelsRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/trending': typeof AuthenticatedTrendingRoute
+  '/hashtag/$tag': typeof AuthenticatedHashtagTagRoute
   '/pack/following': typeof AuthenticatedPackFollowingRoute
   '/pack/suggested': typeof AuthenticatedPackSuggestedRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/u/$username': typeof AuthenticatedUUsernameRoute
   '/pack/': typeof AuthenticatedPackIndexRoute
   '/profile/': typeof AuthenticatedProfileIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/home': typeof AuthenticatedHomeRoute
   '/messages': typeof AuthenticatedMessagesRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/reels': typeof AuthenticatedReelsRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/trending': typeof AuthenticatedTrendingRoute
+  '/hashtag/$tag': typeof AuthenticatedHashtagTagRoute
   '/pack/following': typeof AuthenticatedPackFollowingRoute
   '/pack/suggested': typeof AuthenticatedPackSuggestedRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/u/$username': typeof AuthenticatedUUsernameRoute
   '/pack': typeof AuthenticatedPackIndexRoute
   '/profile': typeof AuthenticatedProfileIndexRoute
 }
@@ -140,16 +180,21 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/bookmarks': typeof AuthenticatedBookmarksRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/messages': typeof AuthenticatedMessagesRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/pack': typeof AuthenticatedPackRouteWithChildren
   '/_authenticated/profile': typeof AuthenticatedProfileRouteWithChildren
+  '/_authenticated/reels': typeof AuthenticatedReelsRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/trending': typeof AuthenticatedTrendingRoute
+  '/_authenticated/hashtag/$tag': typeof AuthenticatedHashtagTagRoute
   '/_authenticated/pack/following': typeof AuthenticatedPackFollowingRoute
   '/_authenticated/pack/suggested': typeof AuthenticatedPackSuggestedRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
+  '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
   '/_authenticated/pack/': typeof AuthenticatedPackIndexRoute
   '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
 }
@@ -158,30 +203,40 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/bookmarks'
     | '/home'
     | '/messages'
     | '/notifications'
     | '/pack'
     | '/profile'
+    | '/reels'
     | '/search'
     | '/settings'
+    | '/trending'
+    | '/hashtag/$tag'
     | '/pack/following'
     | '/pack/suggested'
     | '/profile/edit'
+    | '/u/$username'
     | '/pack/'
     | '/profile/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/bookmarks'
     | '/home'
     | '/messages'
     | '/notifications'
+    | '/reels'
     | '/search'
     | '/settings'
+    | '/trending'
+    | '/hashtag/$tag'
     | '/pack/following'
     | '/pack/suggested'
     | '/profile/edit'
+    | '/u/$username'
     | '/pack'
     | '/profile'
   id:
@@ -189,16 +244,21 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/bookmarks'
     | '/_authenticated/home'
     | '/_authenticated/messages'
     | '/_authenticated/notifications'
     | '/_authenticated/pack'
     | '/_authenticated/profile'
+    | '/_authenticated/reels'
     | '/_authenticated/search'
     | '/_authenticated/settings'
+    | '/_authenticated/trending'
+    | '/_authenticated/hashtag/$tag'
     | '/_authenticated/pack/following'
     | '/_authenticated/pack/suggested'
     | '/_authenticated/profile/edit'
+    | '/_authenticated/u/$username'
     | '/_authenticated/pack/'
     | '/_authenticated/profile/'
   fileRoutesById: FileRoutesById
@@ -232,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/trending': {
+      id: '/_authenticated/trending'
+      path: '/trending'
+      fullPath: '/trending'
+      preLoaderRoute: typeof AuthenticatedTrendingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -244,6 +311,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof AuthenticatedSearchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/reels': {
+      id: '/_authenticated/reels'
+      path: '/reels'
+      fullPath: '/reels'
+      preLoaderRoute: typeof AuthenticatedReelsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile': {
@@ -281,6 +355,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/bookmarks': {
+      id: '/_authenticated/bookmarks'
+      path: '/bookmarks'
+      fullPath: '/bookmarks'
+      preLoaderRoute: typeof AuthenticatedBookmarksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile/': {
       id: '/_authenticated/profile/'
       path: '/'
@@ -294,6 +375,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pack/'
       preLoaderRoute: typeof AuthenticatedPackIndexRouteImport
       parentRoute: typeof AuthenticatedPackRoute
+    }
+    '/_authenticated/u/$username': {
+      id: '/_authenticated/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof AuthenticatedUUsernameRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/profile/edit': {
       id: '/_authenticated/profile/edit'
@@ -315,6 +403,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pack/following'
       preLoaderRoute: typeof AuthenticatedPackFollowingRouteImport
       parentRoute: typeof AuthenticatedPackRoute
+    }
+    '/_authenticated/hashtag/$tag': {
+      id: '/_authenticated/hashtag/$tag'
+      path: '/hashtag/$tag'
+      fullPath: '/hashtag/$tag'
+      preLoaderRoute: typeof AuthenticatedHashtagTagRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
@@ -348,23 +443,33 @@ const AuthenticatedProfileRouteWithChildren =
   AuthenticatedProfileRoute._addFileChildren(AuthenticatedProfileRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBookmarksRoute: typeof AuthenticatedBookmarksRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPackRoute: typeof AuthenticatedPackRouteWithChildren
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRouteWithChildren
+  AuthenticatedReelsRoute: typeof AuthenticatedReelsRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedTrendingRoute: typeof AuthenticatedTrendingRoute
+  AuthenticatedHashtagTagRoute: typeof AuthenticatedHashtagTagRoute
+  AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBookmarksRoute: AuthenticatedBookmarksRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedMessagesRoute: AuthenticatedMessagesRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPackRoute: AuthenticatedPackRouteWithChildren,
   AuthenticatedProfileRoute: AuthenticatedProfileRouteWithChildren,
+  AuthenticatedReelsRoute: AuthenticatedReelsRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedTrendingRoute: AuthenticatedTrendingRoute,
+  AuthenticatedHashtagTagRoute: AuthenticatedHashtagTagRoute,
+  AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
