@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { BarChart2, Eye, Heart, Repeat2, MessageCircle, Flame, TrendingUp } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
