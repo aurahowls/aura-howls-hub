@@ -143,9 +143,9 @@ function AnalyticsPage() {
           <ul className="divide-y divide-border">
             {topHowls.map((h) => (
               <li key={h.id} className="flex items-center gap-3 py-3">
-                <Link to="/howl/$id" params={{ id: h.id }} className="min-w-0 flex-1">
+                <div className="min-w-0 flex-1">
                   <p className="line-clamp-2 text-sm">{h.content ?? <em className="text-muted-foreground">[media]</em>}</p>
-                </Link>
+                </div>
                 {trendingIds.has(h.id) && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">
                     <Flame className="h-3 w-3" /> Trending
