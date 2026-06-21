@@ -11,6 +11,11 @@ import {
 } from "@/lib/howls";
 import { HowlMedia } from "./HowlMedia";
 import { EchoesDialog } from "./EchoesDialog";
+import { BookmarkButton } from "./BookmarkButton";
+import { PollBlock } from "./PollBlock";
+import { MaybeVerified } from "./VerifiedBadge";
+import { LinkifiedText } from "@/lib/text";
+import { Link } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import {
   DropdownMenu,
@@ -61,6 +66,7 @@ export function HowlCard({
 
   const handle = howl.author?.username ?? "wolf";
   const displayName = howl.author?.display_name ?? handle;
+  const verified = howl.author?.is_verified ?? false;
   const avatar =
     howl.author?.avatar_url ??
     `https://api.dicebear.com/9.x/glass/svg?seed=${encodeURIComponent(handle)}`;
@@ -133,11 +139,20 @@ export function HowlCard({
   return (
     <article className="glass-card group rounded-3xl p-5 transition-all hover:border-primary/40 hover:shadow-[0_0_40px_-12px_oklch(0.78_0.16_70/0.35)]">
       <div className="flex gap-3">
-        <img src={avatar} alt="" className="h-11 w-11 shrink-0 rounded-full ring-1 ring-border" />
+        <Link to="/u/$username" params={{ username: handle }} className="shrink-0">
+          <img src={avatar} alt="" className="h-11 w-11 rounded-full ring-1 ring-border" />
+        </Link>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="flex flex-wrap items-baseline gap-x-2">
-              <span className="truncate font-semibold">{displayName}</span>
+              <Link
+                to="/u/$username"
+                params={{ username: handle }}
+                className="inline-flex items-center gap-1 truncate font-semibold hover:underline"
+              >
+                {displayName}
+                <MaybeVerified verified={verified} size={14} />
+              </Link>
               <span className="truncate text-sm text-muted-foreground">
                 @{handle} · {formatRelative(howl.created_at)}
                 {edited && <span className="ml-1 italic">(edited)</span>}
@@ -185,12 +200,14 @@ export function HowlCard({
           ) : (
             content && (
               <p className="mt-1 whitespace-pre-wrap text-[15px] leading-relaxed text-foreground/95">
-                {content}
+                <LinkifiedText text={content} />
               </p>
             )
           )}
 
           <HowlMedia media={howl.media} howlId={howl.id} viewCount={howl.view_count} />
+
+          <PollBlock howlId={howl.id} />
 
           <div className="mt-4 flex max-w-md items-center justify-between text-muted-foreground">
             <button
@@ -228,6 +245,7 @@ export function HowlCard({
             >
               <Share2 className="h-4 w-4" />
             </button>
+            <BookmarkButton howlId={howl.id} />
           </div>
         </div>
       </div>
