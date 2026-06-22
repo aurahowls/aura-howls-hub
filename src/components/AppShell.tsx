@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, Bell, Mail, Search, User, Settings, LogOut, Menu, X, Sparkles, Users, Bookmark, Flame, Film, BarChart2 } from "lucide-react";
+import { Home, Bell, Mail, Search, User, Settings, LogOut, Menu, X, Sparkles, Users, Bookmark, Flame, Film, BarChart2, Shield } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Logo, LogoWordmark } from "./Logo";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import { useCurrentUser } from "@/hooks/use-current-user";
 import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useQueryClient } from "@tanstack/react-query";
 import { MaybeVerified } from "./VerifiedBadge";
+import { useModRole } from "@/hooks/use-mod-role";
 
 const nav = [
   { to: "/home", label: "Den", icon: Home },
@@ -32,7 +33,9 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
   const queryClient = useQueryClient();
   const { profile, user } = useCurrentUser();
   const { alerts, dms } = useUnreadCounts();
+  const { isModerator } = useModRole();
   const badges: Record<string, number> = { alerts, dms };
+  const visibleNav = isModerator ? [...nav, { to: "/admin", label: "Admin", icon: Shield }] : nav;
 
   async function handleSignOut() {
     await queryClient.cancelQueries();
@@ -77,7 +80,7 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
           </div>
 
           <nav className="flex flex-col gap-1">
-            {nav.map((item) => {
+            {visibleNav.map((item) => {
               const active = pathname === item.to;
               const Icon = item.icon;
               const badge = "badgeKey" in item && item.badgeKey ? badges[item.badgeKey] : 0;
