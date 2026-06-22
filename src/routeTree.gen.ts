@@ -24,6 +24,7 @@ import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedBookmarksRouteImport } from './routes/_authenticated/bookmarks'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile.index'
 import { Route as AuthenticatedPackIndexRouteImport } from './routes/_authenticated/pack.index'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
@@ -109,6 +110,11 @@ const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileIndexRoute =
   AuthenticatedProfileIndexRouteImport.update({
     id: '/',
@@ -150,14 +156,15 @@ const AuthenticatedHashtagTagRoute = AuthenticatedHashtagTagRouteImport.update({
 } as any)
 const AuthenticatedAdminVerificationRoute =
   AuthenticatedAdminVerificationRouteImport.update({
-    id: '/admin/verification',
-    path: '/admin/verification',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/verification',
+    path: '/verification',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/home': typeof AuthenticatedHomeRoute
@@ -182,6 +189,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/bookmarks': typeof AuthenticatedBookmarksRoute
   '/home': typeof AuthenticatedHomeRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/bookmarks': typeof AuthenticatedBookmarksRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
@@ -232,6 +241,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/admin'
     | '/analytics'
     | '/bookmarks'
     | '/home'
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/admin'
     | '/analytics'
     | '/bookmarks'
     | '/home'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/admin'
     | '/_authenticated/analytics'
     | '/_authenticated/bookmarks'
     | '/_authenticated/home'
@@ -414,6 +426,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile/': {
       id: '/_authenticated/profile/'
       path: '/'
@@ -465,13 +484,24 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/admin/verification': {
       id: '/_authenticated/admin/verification'
-      path: '/admin/verification'
+      path: '/verification'
       fullPath: '/admin/verification'
       preLoaderRoute: typeof AuthenticatedAdminVerificationRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedAdminRoute
     }
   }
 }
+
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminVerificationRoute: typeof AuthenticatedAdminVerificationRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminVerificationRoute: AuthenticatedAdminVerificationRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedPackRouteChildren {
   AuthenticatedPackFollowingRoute: typeof AuthenticatedPackFollowingRoute
@@ -502,6 +532,7 @@ const AuthenticatedProfileRouteWithChildren =
   AuthenticatedProfileRoute._addFileChildren(AuthenticatedProfileRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedBookmarksRoute: typeof AuthenticatedBookmarksRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
@@ -514,12 +545,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTrendingRoute: typeof AuthenticatedTrendingRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
-  AuthenticatedAdminVerificationRoute: typeof AuthenticatedAdminVerificationRoute
   AuthenticatedHashtagTagRoute: typeof AuthenticatedHashtagTagRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedBookmarksRoute: AuthenticatedBookmarksRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
@@ -532,7 +563,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTrendingRoute: AuthenticatedTrendingRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
-  AuthenticatedAdminVerificationRoute: AuthenticatedAdminVerificationRoute,
   AuthenticatedHashtagTagRoute: AuthenticatedHashtagTagRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
 }
