@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          active: boolean
+          author_id: string | null
+          body: string
+          created_at: string
+          id: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          author_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          author_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
       bookmarks: {
         Row: {
           created_at: string
@@ -264,6 +309,7 @@ export type Database = {
           created_at: string
           echo_count: number
           edited: boolean
+          featured_at: string | null
           howl_count: number
           id: string
           rehowl_count: number
@@ -277,6 +323,7 @@ export type Database = {
           created_at?: string
           echo_count?: number
           edited?: boolean
+          featured_at?: string | null
           howl_count?: number
           id?: string
           rehowl_count?: number
@@ -290,6 +337,7 @@ export type Database = {
           created_at?: string
           echo_count?: number
           edited?: boolean
+          featured_at?: string | null
           howl_count?: number
           id?: string
           rehowl_count?: number
@@ -362,6 +410,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      moderation_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          notes: string | null
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
+      }
+      mutes: {
+        Row: {
+          created_at: string
+          muted_id: string
+          muter_id: string
+        }
+        Insert: {
+          created_at?: string
+          muted_id: string
+          muter_id: string
+        }
+        Update: {
+          created_at?: string
+          muted_id?: string
+          muter_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -530,6 +629,9 @@ export type Database = {
           id: string
           is_verified: boolean
           location: string | null
+          mod_reason: string | null
+          mod_status: Database["public"]["Enums"]["user_mod_status"]
+          suspended_until: string | null
           updated_at: string
           username: string
           website: string | null
@@ -546,6 +648,9 @@ export type Database = {
           id: string
           is_verified?: boolean
           location?: string | null
+          mod_reason?: string | null
+          mod_status?: Database["public"]["Enums"]["user_mod_status"]
+          suspended_until?: string | null
           updated_at?: string
           username: string
           website?: string | null
@@ -562,9 +667,33 @@ export type Database = {
           id?: string
           is_verified?: boolean
           location?: string | null
+          mod_reason?: string | null
+          mod_status?: Database["public"]["Enums"]["user_mod_status"]
+          suspended_until?: string | null
           updated_at?: string
           username?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      rate_limits: {
+        Row: {
+          action: string
+          count: number
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          action: string
+          count?: number
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          action?: string
+          count?: number
+          user_id?: string
+          window_start?: string
         }
         Relationships: []
       }
@@ -586,6 +715,48 @@ export type Database = {
           id?: string
           query?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          resolution_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          resolution_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolution_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["report_target"]
         }
         Relationships: []
       }
@@ -643,6 +814,33 @@ export type Database = {
         }
         Relationships: []
       }
+      warnings: {
+        Row: {
+          acknowledged_at: string | null
+          created_at: string
+          id: string
+          issued_by: string | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          created_at?: string
+          id?: string
+          issued_by?: string | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -652,6 +850,10 @@ export type Database = {
         Args: { _col: string; _delta: number; _howl: string }
         Returns: undefined
       }
+      check_rate_limit: {
+        Args: { _action: string; _max: number; _window_seconds: number }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -660,6 +862,7 @@ export type Database = {
         Returns: boolean
       }
       increment_howl_view: { Args: { _howl: string }; Returns: undefined }
+      is_blocked_between: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
@@ -670,6 +873,9 @@ export type Database = {
         | "rehowl"
         | "mention"
         | "dm"
+      report_status: "pending" | "reviewing" | "resolved" | "dismissed"
+      report_target: "user" | "howl" | "echo" | "message"
+      user_mod_status: "active" | "suspended" | "banned" | "shadow_banned"
       verification_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -807,6 +1013,9 @@ export const Constants = {
         "mention",
         "dm",
       ],
+      report_status: ["pending", "reviewing", "resolved", "dismissed"],
+      report_target: ["user", "howl", "echo", "message"],
+      user_mod_status: ["active", "suspended", "banned", "shadow_banned"],
       verification_status: ["pending", "approved", "rejected"],
     },
   },
