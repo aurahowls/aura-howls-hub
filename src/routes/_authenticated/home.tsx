@@ -4,6 +4,7 @@ import { Loader2, UserPlus } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { HowlCard, HowlSkeleton } from "@/components/HowlCard";
 import { HowlComposer } from "@/components/HowlComposer";
+import { AnnouncementBanner } from "@/components/AnnouncementBanner";
 import { FollowButton } from "@/components/FollowButton";
 import { fetchForYouFeedPage, fetchFollowingFeedPage, invalidateForYouPool } from "@/lib/feed";
 import { fetchSuggestedPack, type ProfileSummary } from "@/lib/profiles";
@@ -129,6 +130,7 @@ function HomePage() {
         </div>
       </div>
 
+      <AnnouncementBanner />
       <HowlComposer onPosted={handlePosted} />
 
       <div className="space-y-3">
