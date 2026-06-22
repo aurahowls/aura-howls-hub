@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, Repeat2, Share2, MoreHorizontal, Pencil, Trash2, Eye, Loader2 } from "lucide-react";
+import { MessageCircle, Repeat2, Share2, MoreHorizontal, Pencil, Trash2, Eye, Loader2, Flag, UserX, VolumeX } from "lucide-react";
 import {
   deleteHowl,
   editHowl,
@@ -14,6 +14,8 @@ import { EchoesDialog } from "./EchoesDialog";
 import { BookmarkButton } from "./BookmarkButton";
 import { PollBlock } from "./PollBlock";
 import { MaybeVerified } from "./VerifiedBadge";
+import { ReportDialog } from "./ReportDialog";
+import { blockUser, muteUser } from "@/lib/moderation";
 import { LinkifiedText } from "@/lib/text";
 import { Link } from "@tanstack/react-router";
 import { useCurrentUser } from "@/hooks/use-current-user";
@@ -63,6 +65,7 @@ export function HowlCard({
   const [savingEdit, setSavingEdit] = useState(false);
   const [content, setContent] = useState(howl.content ?? "");
   const [edited, setEdited] = useState(howl.edited);
+  const [reportOpen, setReportOpen] = useState(false);
 
   const handle = howl.author?.username ?? "wolf";
   const displayName = howl.author?.display_name ?? handle;
@@ -158,7 +161,7 @@ export function HowlCard({
                 {edited && <span className="ml-1 italic">(edited)</span>}
               </span>
             </div>
-            {isMine && !editing && (
+            {!editing && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
@@ -169,12 +172,38 @@ export function HowlCard({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="border-border bg-card">
-                  <DropdownMenuItem onSelect={() => { setDraft(content); setEditing(true); }}>
-                    <Pencil className="mr-2 h-4 w-4" /> Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onSelect={onDelete} className="text-destructive focus:text-destructive">
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete
-                  </DropdownMenuItem>
+                  {isMine ? (
+                    <>
+                      <DropdownMenuItem onSelect={() => { setDraft(content); setEditing(true); }}>
+                        <Pencil className="mr-2 h-4 w-4" /> Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={onDelete} className="text-destructive focus:text-destructive">
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem onSelect={() => setReportOpen(true)}>
+                        <Flag className="mr-2 h-4 w-4" /> Report Howl
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onSelect={async () => {
+                          try { await muteUser(howl.author_id); toast.success("Muted"); } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+                        }}
+                      >
+                        <VolumeX className="mr-2 h-4 w-4" /> Mute @{handle}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onSelect={async () => {
+                          if (!confirm(`Block @${handle}? You won't see their Howls or DMs.`)) return;
+                          try { await blockUser(howl.author_id); toast.success("Blocked"); onDeleted?.(); } catch (e: any) { toast.error(e?.message ?? "Failed"); }
+                        }}
+                      >
+                        <UserX className="mr-2 h-4 w-4" /> Block @{handle}
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -255,6 +284,12 @@ export function HowlCard({
         onOpenChange={setEchoesOpen}
         howlId={howl.id}
         onChanged={() => setEchoCount((c) => c)}
+      />
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        target_type="howl"
+        target_id={howl.id}
       />
     </article>
   );

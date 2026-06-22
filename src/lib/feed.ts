@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { hydrateHowls, type HowlRecord } from "./howls";
 import { fetchFollowingIds } from "./profiles";
+import { fetchMyBlockIds, fetchMyMuteIds } from "./moderation";
 
 const HOWL_SELECT = `id, author_id, content, view_count, howl_count, echo_count, rehowl_count, edited, created_at, updated_at,
   media:howl_media ( id, storage_path, media_type, position )`;
@@ -12,8 +13,13 @@ export async function fetchFollowingFeedPage(beforeIso?: string, limit = 15): Pr
   const { data: u } = await supabase.auth.getUser();
   const me = u.user?.id;
   if (!me) return { items: [], hasMore: false };
-  const followed = await fetchFollowingIds(me);
-  const ids = Array.from(new Set([me, ...followed]));
+  const [followed, blocked, muted] = await Promise.all([
+    fetchFollowingIds(me),
+    fetchMyBlockIds(),
+    fetchMyMuteIds(),
+  ]);
+  const hideSet = new Set([...blocked, ...muted]);
+  const ids = Array.from(new Set([me, ...followed])).filter((id) => !hideSet.has(id));
   let q = supabase
     .from("howls")
     .select(HOWL_SELECT)
@@ -42,7 +48,13 @@ export function invalidateForYouPool() {
 async function rebuildPool(): Promise<Pool> {
   const { data: u } = await supabase.auth.getUser();
   const me = u.user?.id ?? null;
-  const followedSet = me ? new Set(await fetchFollowingIds(me)) : new Set<string>();
+  const [followedArr, blocked, muted] = await Promise.all([
+    me ? fetchFollowingIds(me) : Promise.resolve([] as string[]),
+    me ? fetchMyBlockIds() : Promise.resolve([] as string[]),
+    me ? fetchMyMuteIds() : Promise.resolve([] as string[]),
+  ]);
+  const followedSet = new Set(followedArr);
+  const hideSet = new Set([...blocked, ...muted]);
   const { data, error } = await supabase
     .from("howls")
     .select(HOWL_SELECT)
@@ -51,6 +63,7 @@ async function rebuildPool(): Promise<Pool> {
   if (error) throw error;
   const now = Date.now();
   const ranked = (data ?? [])
+    .filter((d: any) => !hideSet.has(d.author_id))
     .map((d: any) => {
       const ageH = (now - new Date(d.created_at).getTime()) / 3_600_000;
       const engagement = d.howl_count * 3 + d.rehowl_count * 2 + d.echo_count * 2 + d.view_count * 0.05;

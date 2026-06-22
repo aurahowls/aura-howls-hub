@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { AppShell } from "@/components/AppShell";
@@ -188,6 +188,9 @@ function SettingsPage() {
           <Button type="button" variant="outline" className="rounded-full" onClick={signOut}>
             Log out
           </Button>
+          <Link to="/settings/privacy" className="text-sm text-primary hover:underline">
+            Privacy & Safety →
+          </Link>
           <Button type="submit" disabled={saving} className="btn-gold rounded-full px-6">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
           </Button>
