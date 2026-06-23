@@ -27,6 +27,7 @@ import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedProfileIndexRouteImport } from './routes/_authenticated/profile.index'
 import { Route as AuthenticatedPackIndexRouteImport } from './routes/_authenticated/pack.index'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as AuthenticatedUUsernameRouteImport } from './routes/_authenticated/u.$username'
 import { Route as AuthenticatedSettingsPrivacyRouteImport } from './routes/_authenticated/settings.privacy'
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
@@ -127,6 +128,11 @@ const AuthenticatedPackIndexRoute = AuthenticatedPackIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedPackRoute,
 } as any)
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedUUsernameRoute = AuthenticatedUUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/settings/privacy': typeof AuthenticatedSettingsPrivacyRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/pack/': typeof AuthenticatedPackIndexRoute
   '/profile/': typeof AuthenticatedProfileIndexRoute
 }
@@ -215,6 +222,7 @@ export interface FileRoutesByTo {
   '/profile/edit': typeof AuthenticatedProfileEditRoute
   '/settings/privacy': typeof AuthenticatedSettingsPrivacyRoute
   '/u/$username': typeof AuthenticatedUUsernameRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/pack': typeof AuthenticatedPackIndexRoute
   '/profile': typeof AuthenticatedProfileIndexRoute
 }
@@ -243,6 +251,7 @@ export interface FileRoutesById {
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
   '/_authenticated/settings/privacy': typeof AuthenticatedSettingsPrivacyRoute
   '/_authenticated/u/$username': typeof AuthenticatedUUsernameRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/_authenticated/pack/': typeof AuthenticatedPackIndexRoute
   '/_authenticated/profile/': typeof AuthenticatedProfileIndexRoute
 }
@@ -271,6 +280,7 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/settings/privacy'
     | '/u/$username'
+    | '/api/public/health'
     | '/pack/'
     | '/profile/'
   fileRoutesByTo: FileRoutesByTo
@@ -295,6 +305,7 @@ export interface FileRouteTypes {
     | '/profile/edit'
     | '/settings/privacy'
     | '/u/$username'
+    | '/api/public/health'
     | '/pack'
     | '/profile'
   id:
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile/edit'
     | '/_authenticated/settings/privacy'
     | '/_authenticated/u/$username'
+    | '/api/public/health'
     | '/_authenticated/pack/'
     | '/_authenticated/profile/'
   fileRoutesById: FileRoutesById
@@ -330,6 +342,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -459,6 +472,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pack/'
       preLoaderRoute: typeof AuthenticatedPackIndexRouteImport
       parentRoute: typeof AuthenticatedPackRoute
+    }
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/u/$username': {
       id: '/_authenticated/u/$username'
@@ -607,6 +627,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
