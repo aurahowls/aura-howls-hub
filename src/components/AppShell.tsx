@@ -11,6 +11,7 @@ import { useUnreadCounts } from "@/hooks/use-unread-counts";
 import { useQueryClient } from "@tanstack/react-query";
 import { MaybeVerified } from "./VerifiedBadge";
 import { useModRole } from "@/hooks/use-mod-role";
+import { PWAInstallPrompt } from "./PWAInstallPrompt";
 
 const nav = [
   { to: "/home", label: "Den", icon: Home },
@@ -149,6 +150,7 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
           </aside>
         )}
       </div>
+      <PWAInstallPrompt />
     </div>
   );
 }
