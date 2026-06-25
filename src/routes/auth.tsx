@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { recordSecurityEvent } from "@/lib/security";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -85,6 +86,7 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
+    await recordSecurityEvent("login");
     toast.success("Welcome back to the pack 🐺");
     navigate({ to: "/home", replace: true });
   }
@@ -115,8 +117,8 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    toast.success("Your den is forged 🌙");
-    navigate({ to: "/home", replace: true });
+    toast.success("Your den is forged 🌙 — check your email to verify your account.");
+    navigate({ to: "/verify-email", replace: true });
   }
 
   async function handleGoogle() {
@@ -159,9 +161,14 @@ function AuthPage() {
               <Label htmlFor="password-in">Password</Label>
               <Input id="password-in" name="password" type="password" autoComplete="current-password" required placeholder="••••••••" />
             </div>
-            <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Checkbox name="remember" defaultChecked /> Remember me
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Checkbox name="remember" defaultChecked /> Remember me
+              </label>
+              <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <Button type="submit" disabled={loading} className="btn-gold h-12 w-full rounded-full text-base">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enter the Den"}
             </Button>

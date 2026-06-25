@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { checkHowlRateLimit, checkEchoRateLimit, checkDuplicateHowl, validateHowlFiles, sanitizeHowlContent } from "@/lib/security";
 
 export type HowlMediaItem = {
   id: string;
@@ -159,23 +160,31 @@ export async function createHowl(params: {
   if (userErr || !userData.user) throw new Error("Not signed in");
   const userId = userData.user.id;
 
-  // Validate files
+  // Rate limit check
+  const withinLimit = await checkHowlRateLimit();
+  if (!withinLimit) throw new Error("You're howling too fast — slow down 🐺 (5 Howls per 5 minutes)");
+
+  // Comprehensive file validation
+  const fileErr = validateHowlFiles(params.files);
+  if (fileErr) throw new Error(fileErr);
+
+  // Determine media types for upload
   const types: ("image" | "video")[] = [];
-  let hasVideo = false;
   for (const f of params.files) {
     const t = detectMediaType(f);
     if (!t) throw new Error(`Unsupported file type: ${f.name}`);
-    if (t === "video") {
-      if (f.size > MAX_VIDEO_BYTES) throw new Error(`Video ${f.name} exceeds 100 MB`);
-      hasVideo = true;
-    }
     types.push(t);
   }
-  if (hasVideo && params.files.length > 1)
-    throw new Error("A Howl can include either one video or multiple images, not both");
 
-  const content = params.content.trim();
+  // Sanitize and validate content
+  const content = sanitizeHowlContent(params.content);
   if (!content && params.files.length === 0) throw new Error("Howl needs text or media");
+
+  // Duplicate content check
+  if (content) {
+    const isDuplicate = await checkDuplicateHowl(content);
+    if (isDuplicate) throw new Error("You posted this same Howl recently — wait before reposting");
+  }
 
   const { data: howl, error: insertErr } = await supabase
     .from("howls")
@@ -330,11 +339,14 @@ export async function fetchEchoes(howlId: string): Promise<EchoRecord[]> {
 }
 
 export async function createEcho(howlId: string, content: string) {
-  const trimmed = content.trim();
+  const trimmed = content.trim().slice(0, 500);
   if (!trimmed) throw new Error("Echo cannot be empty");
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
   if (!userId) throw new Error("Sign in to echo");
+  // Rate limit check
+  const withinLimit = await checkEchoRateLimit();
+  if (!withinLimit) throw new Error("You're echoing too fast — slow down 🐺 (15 per 5 minutes)");
   const { error } = await supabase
     .from("howl_echoes")
     .insert({ howl_id: howlId, author_id: userId, content: trimmed });

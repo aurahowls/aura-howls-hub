@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { recordSecurityEvent } from "@/lib/security";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Shield, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -78,6 +79,7 @@ function SettingsPage() {
   }
 
   async function signOut() {
+    await recordSecurityEvent("logout");
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
@@ -188,9 +190,14 @@ function SettingsPage() {
           <Button type="button" variant="outline" className="rounded-full" onClick={signOut}>
             Log out
           </Button>
-          <Link to="/settings/privacy" className="text-sm text-primary hover:underline">
-            Privacy & Safety →
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/settings/privacy" className="flex items-center gap-1 text-sm text-primary hover:underline">
+              <Lock className="h-3.5 w-3.5" /> Privacy & Safety
+            </Link>
+            <Link to="/settings/security" className="flex items-center gap-1 text-sm text-primary hover:underline">
+              <Shield className="h-3.5 w-3.5" /> Security
+            </Link>
+          </div>
           <Button type="submit" disabled={saving} className="btn-gold rounded-full px-6">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
           </Button>

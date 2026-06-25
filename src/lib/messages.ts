@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { checkDmRateLimit, validateImageFile, validateVideoFile } from "@/lib/security";
 
 const SIGNED_TTL = 60 * 60 * 24 * 7; // 7 days
 
@@ -119,10 +120,21 @@ export async function sendMessage(input: {
   content?: string | null;
   file?: File | null;
 }) {
+  // Rate limit DMs
+  const withinLimit = await checkDmRateLimit();
+  if (!withinLimit) throw new Error("You're messaging too fast — slow down 🐺 (30 DMs per 5 minutes)");
+
   let media_path: string | null = null;
   let media_type: "image" | "video" | null = null;
   if (input.file) {
-    const type = input.file.type.startsWith("video") ? "video" : "image";
+    // Validate file before upload
+    const isVideo = input.file.type.startsWith("video");
+    const validationErr = isVideo
+      ? validateVideoFile(input.file)
+      : validateImageFile(input.file);
+    if (validationErr) throw new Error(validationErr);
+
+    const type = isVideo ? "video" : "image";
     media_type = type;
     const ext = input.file.name.split(".").pop() ?? (type === "image" ? "jpg" : "mp4");
     const path = `${input.conversationId}/${crypto.randomUUID()}.${ext}`;
@@ -132,10 +144,11 @@ export async function sendMessage(input: {
     if (upErr) throw upErr;
     media_path = path;
   }
+  const sanitizedContent = input.content?.trim().slice(0, 2000) || null;
   const { error } = await supabase.from("messages").insert({
     conversation_id: input.conversationId,
     sender_id: input.senderId,
-    content: input.content?.trim() || null,
+    content: sanitizedContent,
     media_path,
     media_type,
   });

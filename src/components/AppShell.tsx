@@ -12,6 +12,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { MaybeVerified } from "./VerifiedBadge";
 import { useModRole } from "@/hooks/use-mod-role";
 import { PWAInstallPrompt } from "./PWAInstallPrompt";
+import { EmailVerificationBanner } from "./EmailVerificationBanner";
+import { recordSecurityEvent } from "@/lib/security";
 
 const nav = [
   { to: "/home", label: "Den", icon: Home },
@@ -42,6 +44,7 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
     await queryClient.cancelQueries();
     queryClient.clear();
     sessionStorage.removeItem("aurahowls:remember");
+    await recordSecurityEvent("logout");
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
@@ -54,6 +57,10 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
 
   return (
     <div className="min-h-screen w-full">
+      {/* Email verification banner */}
+      {user && !user.email_confirmed_at && (
+        <EmailVerificationBanner email={user.email} />
+      )}
       {/* Mobile top bar */}
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border/60 bg-background/70 px-4 py-3 backdrop-blur-xl lg:hidden">
         <LogoWordmark size={36} />

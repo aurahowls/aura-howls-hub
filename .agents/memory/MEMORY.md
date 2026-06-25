@@ -1,0 +1,1 @@
+- [AuraHowls Phase 3 Security](phase3-security.md) — Security/auth additions: tables, RPCs, rate limits, new routes, and privacy controls architecture.
