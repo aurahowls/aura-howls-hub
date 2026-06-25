@@ -1,1 +1,2 @@
 - [AuraHowls Phase 3 Security](phase3-security.md) — Security/auth additions: tables, RPCs, rate limits, new routes, and privacy controls architecture.
+- [AuraHowls Phase 4-5 Monetization & Launch](phase4-launch.md) — Creator economy, monetization tables/RPCs, new routes, launch checklist, and invite system.

@@ -84,6 +84,12 @@ function AdminPage() {
           <TabsTrigger value="logs"><ScrollText className="mr-1 h-4 w-4" /> Logs</TabsTrigger>
         </TabsList>
 
+        <div className="flex justify-end">
+          <Link to="/admin/launch" className="text-xs text-primary hover:underline flex items-center gap-1">
+            🚀 Launch Checklist →
+          </Link>
+        </div>
+
         <TabsContent value="dashboard"><DashboardTab /></TabsContent>
         <TabsContent value="reports"><ReportsTab /></TabsContent>
         <TabsContent value="users"><UsersTab isAdmin={isAdmin} /></TabsContent>

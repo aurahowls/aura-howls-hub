@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /settings
+Disallow: /messages
+Disallow: /notifications
+
+Sitemap: https://aurahowlshub.com/sitemap.xml

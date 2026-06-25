@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, Repeat2, Share2, MoreHorizontal, Pencil, Trash2, Eye, Loader2, Flag, UserX, VolumeX } from "lucide-react";
+import { MessageCircle, Repeat2, Share2, MoreHorizontal, Pencil, Trash2, Eye, Loader2, Flag, UserX, VolumeX, Megaphone, Lock } from "lucide-react";
 import {
   deleteHowl,
   editHowl,
@@ -23,11 +23,15 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { TipButton } from "./TipButton";
+import { PromoteHowlDialog } from "./PromoteHowlDialog";
 
 function PawIcon({ className }: { className?: string }) {
   return (
@@ -66,6 +70,10 @@ export function HowlCard({
   const [content, setContent] = useState(howl.content ?? "");
   const [edited, setEdited] = useState(howl.edited);
   const [reportOpen, setReportOpen] = useState(false);
+  const [promoteOpen, setPromoteOpen] = useState(false);
+
+  const isPromoted = (howl as any).is_promoted ?? false;
+  const isSubscriberOnly = (howl as any).is_subscriber_only ?? false;
 
   const handle = howl.author?.username ?? "wolf";
   const displayName = howl.author?.display_name ?? handle;
@@ -141,6 +149,19 @@ export function HowlCard({
 
   return (
     <article className="glass-card group rounded-3xl p-5 transition-all hover:border-primary/40 hover:shadow-[0_0_40px_-12px_oklch(0.78_0.16_70/0.35)]">
+      {/* Sponsored label */}
+      {isPromoted && (
+        <div className="mb-2 flex items-center gap-1.5">
+          <Megaphone className="h-3 w-3 text-muted-foreground/60" />
+          <span className="text-[10px] uppercase tracking-widest font-medium text-muted-foreground/60">Sponsored</span>
+        </div>
+      )}
+      {/* Subscriber-only badge */}
+      {isSubscriberOnly && (
+        <Badge variant="outline" className="mb-2 gap-1 border-purple-500/30 text-purple-400 text-[10px]">
+          <Lock className="h-2.5 w-2.5" /> Subscribers only
+        </Badge>
+      )}
       <div className="flex gap-3">
         <Link to="/u/$username" params={{ username: handle }} className="shrink-0">
           <img src={avatar} alt="" className="h-11 w-11 rounded-full ring-1 ring-border" />
@@ -177,6 +198,10 @@ export function HowlCard({
                       <DropdownMenuItem onSelect={() => { setDraft(content); setEditing(true); }}>
                         <Pencil className="mr-2 h-4 w-4" /> Edit
                       </DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setPromoteOpen(true)}>
+                        <Megaphone className="mr-2 h-4 w-4" /> Promote Howl
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
                       <DropdownMenuItem onSelect={onDelete} className="text-destructive focus:text-destructive">
                         <Trash2 className="mr-2 h-4 w-4" /> Delete
                       </DropdownMenuItem>
@@ -274,6 +299,13 @@ export function HowlCard({
             >
               <Share2 className="h-4 w-4" />
             </button>
+            {!isMine && (
+              <TipButton
+                recipientId={howl.author_id}
+                recipientName={handle}
+                howlId={howl.id}
+              />
+            )}
             <BookmarkButton howlId={howl.id} />
           </div>
         </div>
@@ -290,6 +322,11 @@ export function HowlCard({
         onOpenChange={setReportOpen}
         target_type="howl"
         target_id={howl.id}
+      />
+      <PromoteHowlDialog
+        howlId={howl.id}
+        open={promoteOpen}
+        onOpenChange={setPromoteOpen}
       />
     </article>
   );

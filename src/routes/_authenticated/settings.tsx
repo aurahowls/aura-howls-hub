@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { recordSecurityEvent } from "@/lib/security";
 import { toast } from "sonner";
-import { Loader2, Shield, Lock } from "lucide-react";
+import { Loader2, Shield, Lock, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -196,6 +196,9 @@ function SettingsPage() {
             </Link>
             <Link to="/settings/security" className="flex items-center gap-1 text-sm text-primary hover:underline">
               <Shield className="h-3.5 w-3.5" /> Security
+            </Link>
+            <Link to="/settings/creator" className="flex items-center gap-1 text-sm text-primary hover:underline">
+              <Sparkles className="h-3.5 w-3.5" /> Creator & Business
             </Link>
           </div>
           <Button type="submit" disabled={saving} className="btn-gold rounded-full px-6">
