@@ -10,8 +10,9 @@ import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { recordSecurityEvent } from "@/lib/security";
+import { getMyReferralCode, buildReferralUrl, copyReferralLink } from "@/lib/referral";
 import { toast } from "sonner";
-import { Loader2, Shield, Lock, Sparkles } from "lucide-react";
+import { Loader2, Shield, Lock, Sparkles, Gift, Copy, Check } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   component: SettingsPage,
@@ -30,6 +31,8 @@ function SettingsPage() {
   const navigate = useNavigate();
   const { profile, user, loading } = useCurrentUser();
   const [saving, setSaving] = useState(false);
+  const [refCode, setRefCode] = useState<string | null>(null);
+  const [refCopied, setRefCopied] = useState(false);
   const [form, setForm] = useState({
     display_name: "",
     bio: "",
@@ -76,6 +79,24 @@ function SettingsPage() {
       return;
     }
     toast.success("Profile updated 🌙");
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    getMyReferralCode().then((c) => { if (!cancelled) setRefCode(c); });
+    return () => { cancelled = true; };
+  }, []);
+
+  async function handleCopyRef() {
+    if (!refCode) return;
+    const ok = await copyReferralLink(refCode);
+    if (ok) {
+      setRefCopied(true);
+      toast.success("Referral link copied 🐺");
+      setTimeout(() => setRefCopied(false), 2500);
+    } else {
+      toast.error("Copy failed — try manually");
+    }
   }
 
   async function signOut() {
@@ -171,17 +192,17 @@ function SettingsPage() {
         <section className="glass-card rounded-3xl p-6">
           <h2 className="mb-4 font-display text-xl font-bold">Wolf Alerts</h2>
           {[
-            { label: "New Pack Members", desc: "When a wolf joins your pack." },
-            { label: "Echoes on your Howls", desc: "Replies and threads under your Howls." },
-            { label: "Rehowls", desc: "When a wolf rehowls your Howl." },
-            { label: "Pack DMs", desc: "Direct messages from your pack." },
+            { id: "notif-pack-members", label: "New Pack Members", desc: "When a wolf joins your pack." },
+            { id: "notif-echoes", label: "Echoes on your Howls", desc: "Replies and threads under your Howls." },
+            { id: "notif-rehowls", label: "Rehowls", desc: "When a wolf rehowls your Howl." },
+            { id: "notif-dms", label: "Pack DMs", desc: "Direct messages from your pack." },
           ].map((s, i) => (
-            <div key={s.label} className="flex items-center justify-between border-t border-border py-4 first:border-t-0 first:pt-0">
+            <div key={s.id} className="flex items-center justify-between border-t border-border py-4 first:border-t-0 first:pt-0">
               <div>
-                <p className="font-medium">{s.label}</p>
+                <Label htmlFor={s.id} className="font-medium cursor-pointer">{s.label}</Label>
                 <p className="text-xs text-muted-foreground">{s.desc}</p>
               </div>
-              <Switch defaultChecked={i !== 2} />
+              <Switch id={s.id} defaultChecked={i !== 2} aria-label={s.label} />
             </div>
           ))}
         </section>
@@ -192,20 +213,56 @@ function SettingsPage() {
           </Button>
           <div className="flex items-center gap-4">
             <Link to="/settings/privacy" className="flex items-center gap-1 text-sm text-primary hover:underline">
-              <Lock className="h-3.5 w-3.5" /> Privacy & Safety
+              <Lock className="h-3.5 w-3.5" aria-hidden /> Privacy & Safety
             </Link>
             <Link to="/settings/security" className="flex items-center gap-1 text-sm text-primary hover:underline">
-              <Shield className="h-3.5 w-3.5" /> Security
+              <Shield className="h-3.5 w-3.5" aria-hidden /> Security
             </Link>
             <Link to="/settings/creator" className="flex items-center gap-1 text-sm text-primary hover:underline">
-              <Sparkles className="h-3.5 w-3.5" /> Creator & Business
+              <Sparkles className="h-3.5 w-3.5" aria-hidden /> Creator & Business
             </Link>
           </div>
           <Button type="submit" disabled={saving} className="btn-gold rounded-full px-6">
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : "Save Changes"}
           </Button>
         </div>
       </form>
+
+      {/* Referral code card — outside form so it doesn't submit */}
+      <section className="glass-card rounded-3xl p-6 mt-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Gift className="h-5 w-5 text-primary" aria-hidden />
+          <h2 className="font-display text-xl font-bold">Invite &amp; Earn</h2>
+          <Link to="/referral" className="ml-auto text-xs text-primary hover:underline">
+            Full dashboard →
+          </Link>
+        </div>
+        <p className="mb-3 text-sm text-muted-foreground">
+          Share your link — earn <strong className="text-primary">30 free Wolf+ days</strong> per new wolf you bring in.
+        </p>
+        {refCode ? (
+          <div className="flex gap-2">
+            <Input
+              readOnly
+              value={buildReferralUrl(refCode)}
+              aria-label="Your referral link"
+              className="font-mono text-xs"
+              onFocus={(e) => e.target.select()}
+            />
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              onClick={handleCopyRef}
+              aria-label={refCopied ? "Link copied" : "Copy referral link"}
+            >
+              {refCopied ? <Check className="h-4 w-4 text-emerald-400" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}
+            </Button>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground animate-pulse">Generating your link…</p>
+        )}
+      </section>
     </AppShell>
   );
 }

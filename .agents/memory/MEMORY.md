@@ -1,2 +1,4 @@
 - [AuraHowls Phase 3 Security](phase3-security.md) — Security/auth additions: tables, RPCs, rate limits, new routes, and privacy controls architecture.
 - [AuraHowls Phase 4-5 Monetization & Launch](phase4-launch.md) — Creator economy, monetization tables/RPCs, new routes, launch checklist, and invite system.
+- [QA Audit June 2026](qa-audit-2026-06.md) — Full audit complete; score 74/100; blockers: payment gateway, email provider, referral credit cap, WCAG switch labels, Reels keyboard nav.
+- [Referral System](referral-system.md) — /referral route + auth.tsx ?ref= capture + settings widget complete; 30d referrer credit, 7d new user welcome bonus.

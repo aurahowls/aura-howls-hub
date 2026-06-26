@@ -110,8 +110,16 @@ export async function fetchMediaHowls(authorId: string): Promise<HowlRecord[]> {
   return fetchHowlsByIds(ids);
 }
 
+/** Cache the auth user for the duration of a hydration batch to avoid N round-trips */
+let _cachedUserId: string | null | undefined = undefined;
+let _cacheExpiresAt = 0;
+
 export async function hydrateHowls(data: any[]): Promise<HowlRecord[]> {
-  const userId = (await supabase.auth.getUser()).data.user?.id;
+  if (_cachedUserId === undefined || Date.now() > _cacheExpiresAt) {
+    _cachedUserId = (await supabase.auth.getUser()).data.user?.id ?? null;
+    _cacheExpiresAt = Date.now() + 30_000; // cache for 30 s
+  }
+  const userId = _cachedUserId;
   const ids = (data ?? []).map((d) => d.id);
   const authorIds = Array.from(new Set((data ?? []).map((d) => d.author_id)));
   let likedSet = new Set<string>();
@@ -229,9 +237,9 @@ export async function createHowl(params: {
     throw e;
   }
 
-  // Re-fetch with media + author
-  const [feed] = await fetchFeed({ authorId: userId });
-  return feed;
+  // Re-fetch just this new howl with media + author hydrated (avoids re-fetching entire feed)
+  const [fresh] = await fetchHowlsByIds([howl.id]);
+  return fresh;
 }
 
 async function uploadWithProgress(opts: {

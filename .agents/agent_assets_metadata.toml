@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "fzAtTbccoCpybp4jDVemu"
+uri = "file://QA_REPORTS.md"
+type = "text"
+title = "AuraHowls QA Reports — All 5 Reports + Launch Readiness Score"

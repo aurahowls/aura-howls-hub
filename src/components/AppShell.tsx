@@ -1,5 +1,5 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, Bell, Mail, Search, User, Settings, LogOut, Menu, X, Sparkles, Users, Bookmark, Flame, Film, BarChart2, Shield, Star, Heart, LayoutDashboard } from "lucide-react";
+import { Home, Bell, Mail, Search, User, Settings, LogOut, Menu, X, Sparkles, Users, Bookmark, Flame, Film, BarChart2, Shield, Star, Heart, LayoutDashboard, Gift } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Logo, LogoWordmark } from "./Logo";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ const nav = [
   { to: "/creator-dashboard", label: "Creator Hub", icon: LayoutDashboard },
   { to: "/tips", label: "Wolf Tips", icon: Heart },
   { to: "/premium", label: "Wolf+", icon: Star },
+  { to: "/referral", label: "Invite & Earn", icon: Gift },
   { to: "/profile", label: "Profile", icon: User },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
@@ -60,6 +61,13 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
 
   return (
     <div className="min-h-screen w-full">
+      {/* Skip to main content — keyboard accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
+      >
+        Skip to content
+      </a>
       {/* Email verification banner */}
       {user && !user.email_confirmed_at && (
         <EmailVerificationBanner email={user.email} />
@@ -70,29 +78,33 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
         <button
           onClick={() => setOpen((o) => !o)}
           className="rounded-full p-2 hover:bg-muted"
-          aria-label="Toggle navigation"
+          aria-label={open ? "Close navigation" : "Open navigation"}
+          aria-expanded={open}
+          aria-controls="mobile-nav"
         >
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {open ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
         </button>
       </header>
 
       <div className="mx-auto flex w-full max-w-7xl gap-6 px-4 lg:px-6">
         {/* Sidebar */}
         <aside
+          id="mobile-nav"
           className={cn(
             "fixed inset-x-0 top-[57px] z-30 border-b border-border bg-background/95 px-4 py-4 backdrop-blur-xl transition-all lg:sticky lg:top-0 lg:z-0 lg:block lg:h-screen lg:w-64 lg:shrink-0 lg:border-0 lg:bg-transparent lg:py-6 lg:backdrop-blur-none",
             open ? "block" : "hidden",
           )}
+          aria-label="Main navigation"
         >
           <div className="hidden lg:mb-8 lg:flex">
-            <Link to="/home" className="block">
+            <Link to="/home" className="block" aria-label="Go to home feed">
               <LogoWordmark size={48} />
             </Link>
           </div>
 
-          <nav className="flex flex-col gap-1">
+          <nav className="flex flex-col gap-1" aria-label="Site navigation">
             {visibleNav.map((item) => {
-              const active = pathname === item.to;
+              const active = pathname === item.to || pathname.startsWith(item.to + "/");
               const Icon = item.icon;
               const badge = "badgeKey" in item && item.badgeKey ? badges[item.badgeKey] : 0;
               return (
@@ -100,6 +112,7 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
                   key={item.to}
                   to={item.to}
                   onClick={() => setOpen(false)}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
                     "group flex items-center gap-4 rounded-2xl px-4 py-3 text-base transition-all",
                     active
@@ -108,9 +121,12 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
                   )}
                 >
                   <span className="relative">
-                    <Icon className={cn("h-5 w-5", active && "text-primary")} />
+                    <Icon className={cn("h-5 w-5", active && "text-primary")} aria-hidden />
                     {badge > 0 ? (
-                      <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground animate-howl-pulse">
+                      <span
+                        className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground animate-howl-pulse"
+                        aria-label={`${badge} unread`}
+                      >
                         {badge > 99 ? "99+" : badge}
                       </span>
                     ) : null}
@@ -122,12 +138,16 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
           </nav>
 
           <Button className="btn-gold mt-6 h-12 w-full rounded-full text-base">
-            <Sparkles className="h-4 w-4" />
+            <Sparkles className="h-4 w-4" aria-hidden />
             New Howl
           </Button>
 
           <div className="mt-6 flex items-center gap-3 rounded-2xl border border-border/60 bg-card/40 p-3 backdrop-blur">
-            <img src={avatarUrl} alt="" className="h-10 w-10 rounded-full ring-1 ring-primary/40" />
+            <img
+              src={avatarUrl}
+              alt={`${displayName}'s avatar`}
+              className="h-10 w-10 rounded-full ring-1 ring-primary/40 object-cover"
+            />
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-1 truncate text-sm font-semibold">
                 <span className="truncate">{displayName}</span>
@@ -141,19 +161,19 @@ export function AppShell({ children, rightRail = true }: { children: ReactNode; 
               className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
               aria-label="Sign out"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4" aria-hidden />
             </button>
           </div>
         </aside>
 
         {/* Main */}
-        <main className="min-w-0 flex-1 py-4 lg:py-6 animate-fade-up">
+        <main className="min-w-0 flex-1 py-4 lg:py-6 animate-fade-up" id="main-content">
           {children}
         </main>
 
         {/* Right rail */}
         {rightRail && (
-          <aside className="hidden w-80 shrink-0 py-6 xl:block">
+          <aside className="hidden w-80 shrink-0 py-6 xl:block" aria-label="Trending topics">
             <div className="sticky top-6 space-y-4">
               <TrendingSidebar />
             </div>

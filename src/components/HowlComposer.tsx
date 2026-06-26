@@ -132,7 +132,7 @@ export function HowlComposer({ onPosted }: { onPosted?: () => void }) {
   return (
     <div className="glass-card mb-4 rounded-3xl p-5">
       <div className="flex gap-3">
-        <img src={avatarUrl} alt="" className="h-11 w-11 rounded-full ring-1 ring-primary/40" />
+        <img src={avatarUrl} alt={`${handle}'s avatar`} className="h-11 w-11 rounded-full ring-1 ring-primary/40 object-cover" />
         <div className="min-w-0 flex-1">
           <textarea
             value={content}
@@ -140,6 +140,8 @@ export function HowlComposer({ onPosted }: { onPosted?: () => void }) {
             placeholder="What's howling, wolf?"
             maxLength={500}
             disabled={busy}
+            aria-label="Write a Howl"
+            enterKeyHint="send"
             className="min-h-[60px] w-full resize-none bg-transparent text-lg outline-none placeholder:text-muted-foreground disabled:opacity-60"
           />
 

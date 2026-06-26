@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { AuthShell } from "@/components/AuthShell";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { recordSecurityEvent } from "@/lib/security";
+import { storeReferralCode, consumeReferralCode, applyReferralCode } from "@/lib/referral";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -45,6 +46,19 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
+  const pendingRefCode = useRef<string | null>(null);
+
+  // Capture ?ref= referral code from the URL and persist it for post-signup use
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      storeReferralCode(ref);
+      pendingRefCode.current = ref.trim().toUpperCase();
+      // Switch to sign-up tab when arriving via referral link
+      setMode("signup");
+    }
+  }, []);
 
   // Redirect away if already signed in
   useEffect(() => {
@@ -59,9 +73,7 @@ function AuthPage() {
   useEffect(() => {
     const ephemeral = sessionStorage.getItem(REMEMBER_KEY) === "false";
     if (!ephemeral) return;
-    const handler = () => {
-      void supabase.auth.signOut();
-    };
+    const handler = () => { void supabase.auth.signOut(); };
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, []);
@@ -104,7 +116,7 @@ function AuthPage() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: parsed.data.email,
       password: parsed.data.password,
       options: {
@@ -117,6 +129,23 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
+
+    // Apply referral code if one was captured before signup
+    if (signUpData.user) {
+      const code = consumeReferralCode() ?? pendingRefCode.current;
+      if (code) {
+        try {
+          const result = await applyReferralCode(code);
+          if (result.success) {
+            toast.success(`Welcome bonus! You earned ${result.new_user_credits_awarded} free Wolf+ days 🐺✨`);
+          }
+        } catch {
+          // Non-fatal — referral failure shouldn't block signup
+        }
+        pendingRefCode.current = null;
+      }
+    }
+
     toast.success("Your den is forged 🌙 — check your email to verify your account.");
     navigate({ to: "/verify-email", replace: true });
   }
@@ -138,7 +167,13 @@ function AuthPage() {
   return (
     <AuthShell
       title={mode === "signin" ? "Welcome back, wolf." : "Forge your den."}
-      subtitle={mode === "signin" ? "Sign in to rejoin your Pack." : "Pick a howl name and join the wild."}
+      subtitle={
+        mode === "signin"
+          ? "Sign in to rejoin your Pack."
+          : pendingRefCode.current
+            ? "You were invited — join to claim your bonus."
+            : "Pick a howl name and join the wild."
+      }
       footer={
         <Link to="/" className="text-muted-foreground hover:text-foreground">
           ← Back to home

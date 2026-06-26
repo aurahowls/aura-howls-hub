@@ -56,7 +56,7 @@ function ReelsPage() {
       <h1 className="sr-only">Wolf Reels</h1>
       <div className="-mt-4 lg:-mt-6">
         <div
-          className="mx-auto h-[calc(100vh-90px)] max-w-md snap-y snap-mandatory overflow-y-auto rounded-3xl bg-black/40"
+          className="mx-auto h-[calc(100dvh-90px)] max-w-md snap-y snap-mandatory overflow-y-auto rounded-3xl bg-black/40"
           style={{ scrollbarWidth: "none" }}
         >
           {loading ? (

@@ -20,6 +20,7 @@ import { Route as AuthenticatedTrendingRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedTipsRouteImport } from './routes/_authenticated/tips'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedSearchRouteImport } from './routes/_authenticated/search'
+import { Route as AuthenticatedReferralRouteImport } from './routes/_authenticated/referral'
 import { Route as AuthenticatedReelsRouteImport } from './routes/_authenticated/reels'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
@@ -98,6 +99,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedSearchRoute = AuthenticatedSearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedReferralRoute = AuthenticatedReferralRouteImport.update({
+  id: '/referral',
+  path: '/referral',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedReelsRoute = AuthenticatedReelsRouteImport.update({
@@ -249,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/premium': typeof AuthenticatedPremiumRoute
   '/profile': typeof AuthenticatedProfileRouteWithChildren
   '/reels': typeof AuthenticatedReelsRoute
+  '/referral': typeof AuthenticatedReferralRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/tips': typeof AuthenticatedTipsRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/premium': typeof AuthenticatedPremiumRoute
   '/reels': typeof AuthenticatedReelsRoute
+  '/referral': typeof AuthenticatedReferralRoute
   '/search': typeof AuthenticatedSearchRoute
   '/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/tips': typeof AuthenticatedTipsRoute
@@ -321,6 +329,7 @@ export interface FileRoutesById {
   '/_authenticated/premium': typeof AuthenticatedPremiumRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRouteWithChildren
   '/_authenticated/reels': typeof AuthenticatedReelsRoute
+  '/_authenticated/referral': typeof AuthenticatedReferralRoute
   '/_authenticated/search': typeof AuthenticatedSearchRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteWithChildren
   '/_authenticated/tips': typeof AuthenticatedTipsRoute
@@ -359,6 +368,7 @@ export interface FileRouteTypes {
     | '/premium'
     | '/profile'
     | '/reels'
+    | '/referral'
     | '/search'
     | '/settings'
     | '/tips'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/premium'
     | '/reels'
+    | '/referral'
     | '/search'
     | '/settings'
     | '/tips'
@@ -430,6 +441,7 @@ export interface FileRouteTypes {
     | '/_authenticated/premium'
     | '/_authenticated/profile'
     | '/_authenticated/reels'
+    | '/_authenticated/referral'
     | '/_authenticated/search'
     | '/_authenticated/settings'
     | '/_authenticated/tips'
@@ -537,6 +549,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof AuthenticatedSearchRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/referral': {
+      id: '/_authenticated/referral'
+      path: '/referral'
+      fullPath: '/referral'
+      preLoaderRoute: typeof AuthenticatedReferralRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/reels': {
@@ -780,6 +799,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRouteWithChildren
   AuthenticatedReelsRoute: typeof AuthenticatedReelsRoute
+  AuthenticatedReferralRoute: typeof AuthenticatedReferralRoute
   AuthenticatedSearchRoute: typeof AuthenticatedSearchRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRouteWithChildren
   AuthenticatedTipsRoute: typeof AuthenticatedTipsRoute
@@ -801,6 +821,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRouteWithChildren,
   AuthenticatedReelsRoute: AuthenticatedReelsRoute,
+  AuthenticatedReferralRoute: AuthenticatedReferralRoute,
   AuthenticatedSearchRoute: AuthenticatedSearchRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRouteWithChildren,
   AuthenticatedTipsRoute: AuthenticatedTipsRoute,

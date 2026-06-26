@@ -40,11 +40,18 @@ function SearchPage() {
   const [recent, setRecent] = useState<string[]>([]);
   const [trending, setTrending] = useState<HashtagSummary[]>([]);
 
+  // Switch tabs without showing stale loading state
+  function handleTabChange(t: Tab) {
+    setTab(t);
+    setLoading(false);
+  }
+
   useEffect(() => {
     if (user?.id) void fetchRecentSearches().then(setRecent);
     void fetchTrendingHashtags(8).then(setTrending);
   }, [user?.id]);
 
+  // Only search the active tab to avoid 4x queries on every keystroke
   useEffect(() => {
     const term = q.trim();
     if (!term) {
@@ -54,19 +61,25 @@ function SearchPage() {
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        const [u, h, v, t2] = await Promise.all([
-          searchUsers(term, { verifiedOnly }),
-          searchHowls(term),
-          searchVideos(term),
-          searchHashtags(term),
-        ]);
-        setUsers(u); setHowls(h); setVideos(v); setTags(t2);
+        if (tab === "users") {
+          const u = await searchUsers(term, { verifiedOnly });
+          setUsers(u);
+        } else if (tab === "howls") {
+          const h = await searchHowls(term);
+          setHowls(h);
+        } else if (tab === "videos") {
+          const v = await searchVideos(term);
+          setVideos(v);
+        } else if (tab === "hashtags") {
+          const t2 = await searchHashtags(term);
+          setTags(t2);
+        }
       } finally {
         setLoading(false);
       }
-    }, 250);
+    }, 300);
     return () => clearTimeout(t);
-  }, [q, verifiedOnly]);
+  }, [q, verifiedOnly, tab]);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +139,7 @@ function SearchPage() {
               ] as { id: Tab; label: string }[]).map((t) => (
                 <button
                   key={t.id}
-                  onClick={() => setTab(t.id)}
+                  onClick={() => handleTabChange(t.id)}
                   className={cn(
                     "rounded-full px-3 py-1.5 transition",
                     tab === t.id ? "bg-primary/15 font-medium text-primary" : "text-muted-foreground hover:text-foreground",

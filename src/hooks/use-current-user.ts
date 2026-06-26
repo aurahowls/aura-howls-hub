@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -22,30 +22,80 @@ export function useCurrentUser() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const userId = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
+
+    async function loadProfile(uid: string) {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", uid)
+        .maybeSingle();
+      if (!cancelled) setProfile(p as Profile | null);
+    }
+
     async function load() {
       const { data } = await supabase.auth.getUser();
       if (cancelled) return;
       setUser(data.user);
       if (data.user) {
-        const { data: p } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", data.user.id)
-          .maybeSingle();
-        if (!cancelled) setProfile(p as Profile | null);
+        userId.current = data.user.id;
+        await loadProfile(data.user.id);
       }
       if (!cancelled) setLoading(false);
     }
+
     load();
-    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
+
+    const { data: authSub } = supabase.auth.onAuthStateChange((_event, session) => {
+      const u = session?.user ?? null;
+      setUser(u);
+      if (u) {
+        userId.current = u.id;
+        void loadProfile(u.id);
+      } else {
+        userId.current = null;
+        setProfile(null);
+        setLoading(false);
+      }
+    });
+
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
+      authSub.subscription.unsubscribe();
     };
   }, []);
 
-  return { user, profile, loading, refresh: () => setProfile(null) };
+  // Real-time subscription: keep profile in sync with DB changes
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`profile-realtime-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${user.id}` },
+        (payload) => {
+          setProfile((prev) =>
+            prev ? { ...prev, ...(payload.new as Partial<Profile>) } : (payload.new as Profile),
+          );
+        },
+      )
+      .subscribe();
+    return () => { void supabase.removeChannel(channel); };
+  }, [user?.id]);
+
+  function refresh() {
+    if (userId.current) {
+      supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId.current)
+        .maybeSingle()
+        .then(({ data }) => setProfile(data as Profile | null));
+    }
+  }
+
+  return { user, profile, loading, refresh };
 }

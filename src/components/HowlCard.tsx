@@ -163,8 +163,8 @@ export function HowlCard({
         </Badge>
       )}
       <div className="flex gap-3">
-        <Link to="/u/$username" params={{ username: handle }} className="shrink-0">
-          <img src={avatar} alt="" className="h-11 w-11 rounded-full ring-1 ring-border" />
+        <Link to="/u/$username" params={{ username: handle }} className="shrink-0" aria-label={`View ${displayName}'s profile`}>
+          <img src={avatar} alt={`${displayName}'s avatar`} className="h-11 w-11 rounded-full ring-1 ring-border object-cover" />
         </Link>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
@@ -187,9 +187,10 @@ export function HowlCard({
                 <DropdownMenuTrigger asChild>
                   <button
                     className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-                    aria-label="More"
+                    aria-label="More options"
+                    aria-haspopup="menu"
                   >
-                    <MoreHorizontal className="h-4 w-4" />
+                    <MoreHorizontal className="h-4 w-4" aria-hidden />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="border-border bg-card">
