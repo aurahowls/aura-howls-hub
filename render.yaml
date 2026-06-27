@@ -3,7 +3,6 @@ services:
     name: aurahowls
     runtime: node
     plan: free
-    nodeVersion: "22"
     buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /health
