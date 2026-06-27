@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite dev --port 5000 --host 0.0.0.0",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node server-adapter.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
