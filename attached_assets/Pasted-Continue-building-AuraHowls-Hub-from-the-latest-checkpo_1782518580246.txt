@@ -1,0 +1,107 @@
+Continue building AuraHowls-Hub from the latest checkpoint.
+
+Do not add any new social features.
+
+Instead, focus entirely on fixing the remaining production blockers identified in the QA audit.
+
+Priority 1 (Critical)
+
+1. Payment Gateway
+- Integrate Stripe.
+- Support Wolf+ Premium subscriptions.
+- Support Creator Tips.
+- Verify payments using Stripe webhooks.
+- Prevent users from receiving Wolf+ benefits before successful payment confirmation.
+
+2. Production Email
+- Configure a production email provider (Resend, SendGrid, or Postmark).
+- Email verification.
+- Password reset.
+- Welcome emails.
+- Referral emails.
+
+3. Referral Security
+- Add referral credit limits.
+- Prevent referral abuse.
+- Limit rewards per user.
+- Detect referral farming.
+
+Priority 2
+
+4. Accessibility
+Fix all accessibility issues from the audit including:
+
+- Notification switch labels
+- Skip to content link
+- More Options button labels
+- Howl composer accessibility
+- Keyboard navigation for Wolf Reels
+- Form error accessibility
+- Proper aria labels
+
+Target WCAG AA compliance.
+
+5. Error Monitoring
+
+Integrate Sentry.
+
+Requirements:
+
+- Client errors
+- Server errors
+- Upload failures
+- Database errors
+- Performance monitoring
+
+6. Media Optimization
+
+Improve media handling.
+
+Requirements:
+
+- Compress uploaded images.
+- Compress uploaded videos where possible.
+- Generate optimized thumbnails.
+- Lazy-load media.
+- Improve loading speed.
+
+7. Howl Detail Page
+
+Create:
+
+/howl/:id
+
+Requirements:
+
+- Open individual Howls
+- Deep linking from notifications
+- Shareable URLs
+- Display comments and media
+
+8. Message Pagination
+
+Replace the 200-message limit with cursor-based pagination.
+
+9. Website Validation
+
+Automatically prepend https:// when users enter website URLs without a protocol.
+
+10. Cloudinary
+
+If Cloudinary is already configured, migrate media delivery to Cloudinary transforms.
+
+Otherwise continue using Supabase Storage without breaking uploads.
+
+Final Task
+
+Re-run the entire QA audit.
+
+Generate:
+
+- Updated Launch Readiness Score
+- Updated Security Score
+- Updated Performance Score
+- Updated Mobile Score
+- Updated Accessibility Score
+
+Automatically fix any remaining issues that can be safely resolved.
