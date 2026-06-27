@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { sendTip, formatMoney } from "@/lib/monetization";
 import { cn } from "@/lib/utils";
+import { isStripeConfigured, createTipCheckoutSession } from "@/lib/stripe";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const PRESET_AMOUNTS = [50, 100, 200, 500, 1000];
 
@@ -28,6 +30,7 @@ export function TipButton({
   howlId?: string;
   className?: string;
 }) {
+  const { user } = useCurrentUser();
   const [open, setOpen] = useState(false);
   const [amount, setAmount] = useState(100);
   const [customAmount, setCustomAmount] = useState("");
@@ -43,6 +46,19 @@ export function TipButton({
     }
     setLoading(true);
     try {
+      if (isStripeConfigured && user) {
+        const url = await createTipCheckoutSession({
+          recipientId,
+          recipientName,
+          amountCents: effectiveAmount,
+          howlId,
+          message: message || undefined,
+          userId: user.id,
+        });
+        window.location.href = url;
+        return;
+      }
+      // Fallback: record tip in DB without payment (pre-launch / test mode)
       await sendTip(recipientId, effectiveAmount, howlId, message || undefined);
       toast.success(`Tipped ${formatMoney(effectiveAmount)} to @${recipientName}! 🐾`);
       setOpen(false);
@@ -137,7 +153,9 @@ export function TipButton({
             </div>
 
             <p className="text-center text-xs text-muted-foreground">
-              Payment gateway integration required for live transactions.
+              {isStripeConfigured
+                ? "Secure payment via Stripe."
+                : "Payment gateway integration required for live transactions."}
             </p>
           </div>
         </DialogContent>

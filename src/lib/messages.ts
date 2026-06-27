@@ -75,20 +75,48 @@ export async function fetchConversations(meId: string): Promise<ConversationRow[
   return result;
 }
 
-export async function fetchMessages(conversationId: string): Promise<MessageRow[]> {
+const MSG_PAGE_SIZE = 50;
+
+export async function fetchMessages(conversationId: string): Promise<{ messages: MessageRow[]; hasEarlier: boolean }> {
   const { data, error } = await supabase
     .from("messages")
     .select("*")
     .eq("conversation_id", conversationId)
-    .order("created_at", { ascending: true })
-    .limit(200);
+    .order("created_at", { ascending: false })
+    .limit(MSG_PAGE_SIZE + 1);
   if (error) throw error;
-  return Promise.all(
-    (data ?? []).map(async (m) => ({
-      ...(m as MessageRow),
-      media_url: await signMedia((m as MessageRow).media_path),
-    })),
-  );
+  const rows = (data ?? []) as MessageRow[];
+  const hasEarlier = rows.length > MSG_PAGE_SIZE;
+  const page = rows.slice(0, MSG_PAGE_SIZE).reverse();
+  return {
+    hasEarlier,
+    messages: await Promise.all(
+      page.map(async (m) => ({ ...m, media_url: await signMedia(m.media_path) })),
+    ),
+  };
+}
+
+export async function fetchMessagesBefore(
+  conversationId: string,
+  before: string,
+): Promise<{ messages: MessageRow[]; hasEarlier: boolean }> {
+  const { data, error } = await supabase
+    .from("messages")
+    .select("*")
+    .eq("conversation_id", conversationId)
+    .lt("created_at", before)
+    .order("created_at", { ascending: false })
+    .limit(MSG_PAGE_SIZE + 1);
+  if (error) throw error;
+  const rows = (data ?? []) as MessageRow[];
+  const hasEarlier = rows.length > MSG_PAGE_SIZE;
+  const page = rows.slice(0, MSG_PAGE_SIZE).reverse();
+  return {
+    hasEarlier,
+    messages: await Promise.all(
+      page.map(async (m) => ({ ...m, media_url: await signMedia(m.media_path) })),
+    ),
+  };
 }
 
 export async function hydrateMessage(m: MessageRow): Promise<MessageRow> {

@@ -1,4 +1,5 @@
 - [AuraHowls Phase 3 Security](phase3-security.md) — Security/auth additions: tables, RPCs, rate limits, new routes, and privacy controls architecture.
 - [AuraHowls Phase 4-5 Monetization & Launch](phase4-launch.md) — Creator economy, monetization tables/RPCs, new routes, launch checklist, and invite system.
-- [QA Audit June 2026](qa-audit-2026-06.md) — Full audit complete; score 74/100; blockers: payment gateway, email provider, referral credit cap, WCAG switch labels, Reels keyboard nav.
+- [QA Audit Blockers Resolved](qa-audit-2026-06.md) — All 10 blockers fixed June 2026: Stripe, Resend, Sentry, howl detail page, cursor pagination, reels keyboard nav, WCAG aria-labels, URL auto-https, referral security migration.
 - [Referral System](referral-system.md) — /referral route + auth.tsx ?ref= capture + settings widget complete; 30d referrer credit, 7d new user welcome bonus.
+- [Production Infrastructure](prod-infra.md) — Stripe checkout/webhook, Resend email, Sentry monitoring added. Keys needed: STRIPE_SECRET_KEY, VITE_STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET, RESEND_API_KEY, VITE_SENTRY_DSN, SUPABASE_SERVICE_ROLE_KEY, APP_URL.

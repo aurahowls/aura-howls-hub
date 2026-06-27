@@ -267,38 +267,45 @@ export function HowlCard({
           <div className="mt-4 flex max-w-md items-center justify-between text-muted-foreground">
             <button
               onClick={() => setEchoesOpen(true)}
+              aria-label={`${formatCount(echoCount)} echo${echoCount !== 1 ? "s" : ""}. Reply`}
               className="flex items-center gap-2 rounded-full px-2 py-1 transition hover:bg-secondary/15 hover:text-secondary"
             >
-              <MessageCircle className="h-4 w-4" />
-              <span className="text-xs">{formatCount(echoCount)}</span>
+              <MessageCircle className="h-4 w-4" aria-hidden />
+              <span className="text-xs" aria-hidden>{formatCount(echoCount)}</span>
             </button>
             <button
               onClick={onRehowl}
+              aria-label={`${formatCount(rehowlCount)} rehowl${rehowlCount !== 1 ? "s" : ""}. ${rehowled ? "Undo rehowl" : "Rehowl"}`}
+              aria-pressed={rehowled}
               className={cn(
                 "flex items-center gap-2 rounded-full px-2 py-1 transition hover:bg-emerald-500/10 hover:text-emerald-400",
                 rehowled && "text-emerald-400",
               )}
             >
-              <Repeat2 className="h-4 w-4" />
-              <span className="text-xs">{formatCount(rehowlCount)}</span>
+              <Repeat2 className="h-4 w-4" aria-hidden />
+              <span className="text-xs" aria-hidden>{formatCount(rehowlCount)}</span>
             </button>
             <button
               onClick={onLike}
+              aria-label={`${formatCount(likeCount)} like${likeCount !== 1 ? "s" : ""}. ${liked ? "Unlike" : "Like"}`}
+              aria-pressed={liked}
               className={cn(
                 "flex items-center gap-2 rounded-full px-2 py-1 transition hover:bg-primary/10 hover:text-primary",
                 liked && "text-primary",
               )}
             >
-              <PawIcon className={cn("h-4 w-4 transition-transform", liked && "scale-110")} />
-              <span className="text-xs">{formatCount(likeCount)}</span>
+              <PawIcon className={cn("h-4 w-4 transition-transform", liked && "scale-110")} aria-hidden />
+              <span className="text-xs" aria-hidden>{formatCount(likeCount)}</span>
             </button>
-            <span className="flex items-center gap-1 text-xs"><Eye className="h-4 w-4" /> {formatCount(howl.view_count)}</span>
+            <span className="flex items-center gap-1 text-xs" aria-label={`${formatCount(howl.view_count)} views`}>
+              <Eye className="h-4 w-4" aria-hidden /> <span aria-hidden>{formatCount(howl.view_count)}</span>
+            </span>
             <button
               onClick={onShare}
               className="flex items-center gap-2 rounded-full px-2 py-1 transition hover:bg-muted hover:text-foreground"
-              aria-label="Share"
+              aria-label="Share this Howl"
             >
-              <Share2 className="h-4 w-4" />
+              <Share2 className="h-4 w-4" aria-hidden />
             </button>
             {!isMine && (
               <TipButton

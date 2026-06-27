@@ -30,7 +30,8 @@ function resolveNotificationLink(n: AlertRecord): string {
     const actor = n.actor?.username;
     return actor ? `/u/${actor}` : "/pack";
   }
-  // howl_like, echo, rehowl, mention — go to home (future: /howl/:id when detail page added)
+  // howl_like, echo, rehowl, mention — deep-link to howl detail page when howl_id present
+  if (n.howl_id) return `/howl/${n.howl_id}`;
   return "/home";
 }
 

@@ -200,6 +200,7 @@ export function HowlComposer({ onPosted }: { onPosted?: () => void }) {
                     }
                     maxLength={80}
                     placeholder={`Option ${i + 1}`}
+                    aria-label={`Poll option ${i + 1}`}
                     className="flex-1 rounded-lg border border-border bg-background/60 px-3 py-1.5 text-sm outline-none focus:border-primary/50"
                   />
                   {pollOptions.length > 2 && (
@@ -226,9 +227,10 @@ export function HowlComposer({ onPosted }: { onPosted?: () => void }) {
                 ) : (
                   <span className="text-muted-foreground">Max 4 options</span>
                 )}
-                <label className="flex items-center gap-2 text-muted-foreground">
+                <label htmlFor="poll-duration" className="flex items-center gap-2 text-muted-foreground">
                   Ends in
                   <select
+                    id="poll-duration"
                     value={pollDurationH}
                     onChange={(e) => setPollDurationH(Number(e.target.value))}
                     className="rounded-md border border-border bg-background px-2 py-1 text-xs"

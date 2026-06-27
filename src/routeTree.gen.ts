@@ -15,6 +15,9 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiStripeWebhookRouteImport } from './routes/api/stripe-webhook'
+import { Route as ApiStripeCheckoutRouteImport } from './routes/api/stripe-checkout'
+import { Route as ApiSendEmailRouteImport } from './routes/api/send-email'
 import { Route as AuthenticatedVerificationRouteImport } from './routes/_authenticated/verification'
 import { Route as AuthenticatedTrendingRouteImport } from './routes/_authenticated/trending'
 import { Route as AuthenticatedTipsRouteImport } from './routes/_authenticated/tips'
@@ -42,6 +45,7 @@ import { Route as AuthenticatedSettingsCreatorRouteImport } from './routes/_auth
 import { Route as AuthenticatedProfileEditRouteImport } from './routes/_authenticated/profile.edit'
 import { Route as AuthenticatedPackSuggestedRouteImport } from './routes/_authenticated/pack.suggested'
 import { Route as AuthenticatedPackFollowingRouteImport } from './routes/_authenticated/pack.following'
+import { Route as AuthenticatedHowlIdRouteImport } from './routes/_authenticated/howl.$id'
 import { Route as AuthenticatedHashtagTagRouteImport } from './routes/_authenticated/hashtag.$tag'
 import { Route as AuthenticatedAdminVerificationRouteImport } from './routes/_authenticated/admin.verification'
 import { Route as AuthenticatedAdminLaunchRouteImport } from './routes/_authenticated/admin.launch'
@@ -73,6 +77,21 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStripeWebhookRoute = ApiStripeWebhookRouteImport.update({
+  id: '/api/stripe-webhook',
+  path: '/api/stripe-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStripeCheckoutRoute = ApiStripeCheckoutRouteImport.update({
+  id: '/api/stripe-checkout',
+  path: '/api/stripe-checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSendEmailRoute = ApiSendEmailRouteImport.update({
+  id: '/api/send-email',
+  path: '/api/send-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedVerificationRoute =
@@ -220,6 +239,11 @@ const AuthenticatedPackFollowingRoute =
     path: '/following',
     getParentRoute: () => AuthenticatedPackRoute,
   } as any)
+const AuthenticatedHowlIdRoute = AuthenticatedHowlIdRouteImport.update({
+  id: '/howl/$id',
+  path: '/howl/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHashtagTagRoute = AuthenticatedHashtagTagRouteImport.update({
   id: '/hashtag/$tag',
   path: '/hashtag/$tag',
@@ -261,9 +285,13 @@ export interface FileRoutesByFullPath {
   '/tips': typeof AuthenticatedTipsRoute
   '/trending': typeof AuthenticatedTrendingRoute
   '/verification': typeof AuthenticatedVerificationRoute
+  '/api/send-email': typeof ApiSendEmailRoute
+  '/api/stripe-checkout': typeof ApiStripeCheckoutRoute
+  '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/admin/launch': typeof AuthenticatedAdminLaunchRoute
   '/admin/verification': typeof AuthenticatedAdminVerificationRoute
   '/hashtag/$tag': typeof AuthenticatedHashtagTagRoute
+  '/howl/$id': typeof AuthenticatedHowlIdRoute
   '/pack/following': typeof AuthenticatedPackFollowingRoute
   '/pack/suggested': typeof AuthenticatedPackSuggestedRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
@@ -296,9 +324,13 @@ export interface FileRoutesByTo {
   '/tips': typeof AuthenticatedTipsRoute
   '/trending': typeof AuthenticatedTrendingRoute
   '/verification': typeof AuthenticatedVerificationRoute
+  '/api/send-email': typeof ApiSendEmailRoute
+  '/api/stripe-checkout': typeof ApiStripeCheckoutRoute
+  '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/admin/launch': typeof AuthenticatedAdminLaunchRoute
   '/admin/verification': typeof AuthenticatedAdminVerificationRoute
   '/hashtag/$tag': typeof AuthenticatedHashtagTagRoute
+  '/howl/$id': typeof AuthenticatedHowlIdRoute
   '/pack/following': typeof AuthenticatedPackFollowingRoute
   '/pack/suggested': typeof AuthenticatedPackSuggestedRoute
   '/profile/edit': typeof AuthenticatedProfileEditRoute
@@ -335,9 +367,13 @@ export interface FileRoutesById {
   '/_authenticated/tips': typeof AuthenticatedTipsRoute
   '/_authenticated/trending': typeof AuthenticatedTrendingRoute
   '/_authenticated/verification': typeof AuthenticatedVerificationRoute
+  '/api/send-email': typeof ApiSendEmailRoute
+  '/api/stripe-checkout': typeof ApiStripeCheckoutRoute
+  '/api/stripe-webhook': typeof ApiStripeWebhookRoute
   '/_authenticated/admin/launch': typeof AuthenticatedAdminLaunchRoute
   '/_authenticated/admin/verification': typeof AuthenticatedAdminVerificationRoute
   '/_authenticated/hashtag/$tag': typeof AuthenticatedHashtagTagRoute
+  '/_authenticated/howl/$id': typeof AuthenticatedHowlIdRoute
   '/_authenticated/pack/following': typeof AuthenticatedPackFollowingRoute
   '/_authenticated/pack/suggested': typeof AuthenticatedPackSuggestedRoute
   '/_authenticated/profile/edit': typeof AuthenticatedProfileEditRoute
@@ -374,9 +410,13 @@ export interface FileRouteTypes {
     | '/tips'
     | '/trending'
     | '/verification'
+    | '/api/send-email'
+    | '/api/stripe-checkout'
+    | '/api/stripe-webhook'
     | '/admin/launch'
     | '/admin/verification'
     | '/hashtag/$tag'
+    | '/howl/$id'
     | '/pack/following'
     | '/pack/suggested'
     | '/profile/edit'
@@ -409,9 +449,13 @@ export interface FileRouteTypes {
     | '/tips'
     | '/trending'
     | '/verification'
+    | '/api/send-email'
+    | '/api/stripe-checkout'
+    | '/api/stripe-webhook'
     | '/admin/launch'
     | '/admin/verification'
     | '/hashtag/$tag'
+    | '/howl/$id'
     | '/pack/following'
     | '/pack/suggested'
     | '/profile/edit'
@@ -447,9 +491,13 @@ export interface FileRouteTypes {
     | '/_authenticated/tips'
     | '/_authenticated/trending'
     | '/_authenticated/verification'
+    | '/api/send-email'
+    | '/api/stripe-checkout'
+    | '/api/stripe-webhook'
     | '/_authenticated/admin/launch'
     | '/_authenticated/admin/verification'
     | '/_authenticated/hashtag/$tag'
+    | '/_authenticated/howl/$id'
     | '/_authenticated/pack/following'
     | '/_authenticated/pack/suggested'
     | '/_authenticated/profile/edit'
@@ -469,6 +517,9 @@ export interface RootRouteChildren {
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   VerifyEmailRoute: typeof VerifyEmailRoute
+  ApiSendEmailRoute: typeof ApiSendEmailRoute
+  ApiStripeCheckoutRoute: typeof ApiStripeCheckoutRoute
+  ApiStripeWebhookRoute: typeof ApiStripeWebhookRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
 }
 
@@ -514,6 +565,27 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stripe-webhook': {
+      id: '/api/stripe-webhook'
+      path: '/api/stripe-webhook'
+      fullPath: '/api/stripe-webhook'
+      preLoaderRoute: typeof ApiStripeWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stripe-checkout': {
+      id: '/api/stripe-checkout'
+      path: '/api/stripe-checkout'
+      fullPath: '/api/stripe-checkout'
+      preLoaderRoute: typeof ApiStripeCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/send-email': {
+      id: '/api/send-email'
+      path: '/api/send-email'
+      fullPath: '/api/send-email'
+      preLoaderRoute: typeof ApiSendEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/verification': {
@@ -705,6 +777,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPackFollowingRouteImport
       parentRoute: typeof AuthenticatedPackRoute
     }
+    '/_authenticated/howl/$id': {
+      id: '/_authenticated/howl/$id'
+      path: '/howl/$id'
+      fullPath: '/howl/$id'
+      preLoaderRoute: typeof AuthenticatedHowlIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/hashtag/$tag': {
       id: '/_authenticated/hashtag/$tag'
       path: '/hashtag/$tag'
@@ -806,6 +885,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTrendingRoute: typeof AuthenticatedTrendingRoute
   AuthenticatedVerificationRoute: typeof AuthenticatedVerificationRoute
   AuthenticatedHashtagTagRoute: typeof AuthenticatedHashtagTagRoute
+  AuthenticatedHowlIdRoute: typeof AuthenticatedHowlIdRoute
   AuthenticatedUUsernameRoute: typeof AuthenticatedUUsernameRoute
 }
 
@@ -828,6 +908,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTrendingRoute: AuthenticatedTrendingRoute,
   AuthenticatedVerificationRoute: AuthenticatedVerificationRoute,
   AuthenticatedHashtagTagRoute: AuthenticatedHashtagTagRoute,
+  AuthenticatedHowlIdRoute: AuthenticatedHowlIdRoute,
   AuthenticatedUUsernameRoute: AuthenticatedUUsernameRoute,
 }
 
@@ -841,6 +922,9 @@ const rootRouteChildren: RootRouteChildren = {
   ForgotPasswordRoute: ForgotPasswordRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   VerifyEmailRoute: VerifyEmailRoute,
+  ApiSendEmailRoute: ApiSendEmailRoute,
+  ApiStripeCheckoutRoute: ApiStripeCheckoutRoute,
+  ApiStripeWebhookRoute: ApiStripeWebhookRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
 }
 export const routeTree = rootRouteImport

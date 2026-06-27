@@ -10,6 +10,7 @@ import { getWolfPlusStatus, formatMoney } from "@/lib/monetization";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { createCheckoutSession, isStripeConfigured } from "@/lib/stripe";
 
 export const Route = createFileRoute("/_authenticated/premium")({
   head: () => ({
@@ -45,8 +46,23 @@ function PremiumPage() {
     getWolfPlusStatus().then(setStatus).finally(() => setLoading(false));
   }, []);
 
-  const handleSubscribe = () => {
-    toast.info("Payment gateway coming soon! Wolf+ subscriptions will be available at launch. 🐾");
+  const [subscribing, setSubscribing] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (!isStripeConfigured) {
+      toast.info("Payment gateway coming soon! Wolf+ subscriptions will be available at launch. 🐾");
+      return;
+    }
+    if (!user) { toast.error("Sign in to subscribe"); return; }
+    setSubscribing(true);
+    try {
+      const url = await createCheckoutSession(selectedPlan as "monthly" | "annual", user.id);
+      window.location.href = url;
+    } catch (e: any) {
+      toast.error(e?.message ?? "Checkout failed — please try again.");
+    } finally {
+      setSubscribing(false);
+    }
   };
 
   if (loading) return (
@@ -131,13 +147,20 @@ function PremiumPage() {
 
             <Button
               onClick={handleSubscribe}
+              disabled={subscribing}
               className="btn-gold w-full h-12 rounded-full text-base font-bold"
             >
-              ✦ Upgrade to Wolf+ — {formatMoney(PLANS.find(p => p.id === selectedPlan)?.price ?? 999)}/{selectedPlan === "monthly" ? "mo" : "yr"}
+              {subscribing ? (
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Redirecting to checkout…</>
+              ) : (
+                <>✦ Upgrade to Wolf+ — {formatMoney(PLANS.find(p => p.id === selectedPlan)?.price ?? 999)}/{selectedPlan === "monthly" ? "mo" : "yr"}</>
+              )}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">
-              Cancel anytime. No commitment. Wolf+ launches at platform go-live.
+              {isStripeConfigured
+                ? "Secure checkout via Stripe. Cancel anytime."
+                : "Cancel anytime. Wolf+ launches at platform go-live."}
             </p>
           </div>
         )}

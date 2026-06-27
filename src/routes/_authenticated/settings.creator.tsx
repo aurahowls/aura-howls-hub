@@ -16,9 +16,9 @@ import {
   updateAccountSettings, saveCreatorPlan, fetchCreatorPlan,
   type AccountType, type CreatorPlan, formatMoney,
 } from "@/lib/monetization";
+import { cn, ensureHttps } from "@/lib/utils";
 import { WolfPlusBadge, CreatorBadge, BusinessBadge } from "@/components/WolfPlusBadge";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/settings/creator")({
   head: () => ({ meta: [{ title: "Creator & Business Settings — AuraHowls" }] }),
@@ -65,10 +65,12 @@ function CreatorSettingsPage() {
 
   const saveAccountType = async () => {
     setSaving(true);
+    const normalizedWebsite = businessWebsite ? ensureHttps(businessWebsite) : "";
+    if (normalizedWebsite !== businessWebsite) setBusinessWebsite(normalizedWebsite);
     try {
       await updateAccountSettings({
         account_type: accountType,
-        business_website: businessWebsite || undefined,
+        business_website: normalizedWebsite || undefined,
         business_email: businessEmail || undefined,
         business_phone: businessPhone || undefined,
       });
@@ -259,6 +261,7 @@ function CreatorSettingsPage() {
                     placeholder="https://yoursite.com"
                     value={businessWebsite}
                     onChange={(e) => setBusinessWebsite(e.target.value)}
+                    onBlur={() => setBusinessWebsite((v) => ensureHttps(v))}
                     className="bg-card"
                   />
                 </div>

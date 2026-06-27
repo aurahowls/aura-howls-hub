@@ -43,6 +43,7 @@ function ReelsPage() {
   const [items, setItems] = useState<HowlRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [muted, setMuted] = useState(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     void fetchVideoFeed().then((r) => {
@@ -51,12 +52,48 @@ function ReelsPage() {
     });
   }, []);
 
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    const c = scrollRef.current;
+    if (!c) return;
+    if (e.key === "ArrowDown" || e.key === "j") {
+      e.preventDefault();
+      c.scrollBy({ top: c.clientHeight, behavior: "smooth" });
+    } else if (e.key === "ArrowUp" || e.key === "k") {
+      e.preventDefault();
+      c.scrollBy({ top: -c.clientHeight, behavior: "smooth" });
+    } else if (e.key === " ") {
+      e.preventDefault();
+      const cRect = c.getBoundingClientRect();
+      const videos = Array.from(c.querySelectorAll("video"));
+      for (const v of videos) {
+        const r = v.getBoundingClientRect();
+        if (r.top >= cRect.top - 10 && r.top < cRect.bottom) {
+          if (v.paused) v.play().catch(() => {});
+          else v.pause();
+          break;
+        }
+      }
+    } else if (e.key === "m" || e.key === "M") {
+      e.preventDefault();
+      setMuted((m) => !m);
+    }
+  }
+
   return (
     <AppShell rightRail={false}>
       <h1 className="sr-only">Wolf Reels</h1>
+      <p className="sr-only" id="reels-keyboard-hint">
+        Use arrow keys or J/K to navigate reels. Space to pause/play. M to mute.
+      </p>
       <div className="-mt-4 lg:-mt-6">
         <div
-          className="mx-auto h-[calc(100dvh-90px)] max-w-md snap-y snap-mandatory overflow-y-auto rounded-3xl bg-black/40"
+          ref={scrollRef}
+          tabIndex={0}
+          role="region"
+          aria-label="Wolf Reels video feed"
+          aria-describedby="reels-keyboard-hint"
+          onKeyDown={handleKeyDown}
+          className="mx-auto h-[calc(100dvh-90px)] max-w-md snap-y snap-mandatory overflow-y-auto rounded-3xl bg-black/40 focus:outline-none focus:ring-2 focus:ring-primary/60"
           style={{ scrollbarWidth: "none" }}
         >
           {loading ? (

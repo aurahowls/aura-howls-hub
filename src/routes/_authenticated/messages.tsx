@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   fetchConversations,
   fetchMessages,
+  fetchMessagesBefore,
   getOrCreateConversation,
   hydrateMessage,
   markConversationRead,
@@ -41,6 +42,8 @@ function MessagesPage() {
   const [partnerTyping, setPartnerTyping] = useState(false);
   const [partnerLastRead, setPartnerLastRead] = useState<string | null>(null);
   const [showNew, setShowNew] = useState(false);
+  const [hasEarlier, setHasEarlier] = useState(false);
+  const [loadingEarlier, setLoadingEarlier] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -85,8 +88,9 @@ function MessagesPage() {
     setPartnerTyping(false);
     setPartnerLastRead(null);
 
-    fetchMessages(activeId).then((m) => {
-      if (!cancelled) setMessages(m);
+    setHasEarlier(false);
+    fetchMessages(activeId).then(({ messages: m, hasEarlier: h }) => {
+      if (!cancelled) { setMessages(m); setHasEarlier(h); }
     });
     markConversationRead(activeId, user.id);
 
@@ -157,6 +161,31 @@ function MessagesPage() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages.length, partnerTyping]);
+
+  async function loadEarlier() {
+    if (!activeId || loadingEarlier || !messages.length) return;
+    setLoadingEarlier(true);
+    try {
+      const oldest = messages[0].created_at;
+      const { messages: older, hasEarlier: h } = await fetchMessagesBefore(activeId, oldest);
+      if (older.length) {
+        const scrollEl = scrollRef.current;
+        const prevHeight = scrollEl?.scrollHeight ?? 0;
+        setMessages((prev) => [...older, ...prev]);
+        setHasEarlier(h);
+        // Preserve scroll position so the view doesn't jump
+        requestAnimationFrame(() => {
+          if (scrollEl) scrollEl.scrollTop = scrollEl.scrollHeight - prevHeight;
+        });
+      } else {
+        setHasEarlier(false);
+      }
+    } catch {
+      toast.error("Failed to load earlier messages");
+    } finally {
+      setLoadingEarlier(false);
+    }
+  }
 
   function handleTyping(value: string) {
     setDraft(value);
@@ -264,6 +293,19 @@ function MessagesPage() {
                 </div>
               </div>
               <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto p-4">
+                {hasEarlier && (
+                  <div className="flex justify-center pb-1">
+                    <button
+                      onClick={loadEarlier}
+                      disabled={loadingEarlier}
+                      className="flex items-center gap-1.5 rounded-full border border-border/60 bg-card/40 px-4 py-1.5 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground disabled:opacity-50"
+                    >
+                      {loadingEarlier
+                        ? <Loader2 className="h-3 w-3 animate-spin" />
+                        : "↑ Load earlier messages"}
+                    </button>
+                  </div>
+                )}
                 {messages.map((m) => {
                   const mine = m.sender_id === user?.id;
                   return (

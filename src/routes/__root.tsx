@@ -11,8 +11,12 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { initSentry } from "@/lib/sentry";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+
+// Initialize Sentry as early as possible (no-op if VITE_SENTRY_DSN is unset)
+initSentry();
 
 function NotFoundComponent() {
   return (
