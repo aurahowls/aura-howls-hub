@@ -2,6 +2,7 @@ modules = ["nodejs-20", "web"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
+integrations = ["javascript_database:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -22,14 +23,20 @@ args = "Start application"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev -- --port 5000 --host 0.0.0.0"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
 
 [[ports]]
 localPort = 5000
 externalPort = 80
+
+[userenv]
+
+[userenv.shared]
+VITE_SUPABASE_URL = "https://syifojytupgzkitqpcxk.supabase.co"
+VITE_SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5aWZvanl0dXBnemtpdHFwY3hrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3OTQxMDAsImV4cCI6MjA5NzM3MDEwMH0.u2qOGwuJtTlTGiVP4cC5CC41IfrYV5j4toa4xRSmjkE"
