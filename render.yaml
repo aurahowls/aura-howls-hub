@@ -3,7 +3,8 @@ services:
     name: aurahowls
     runtime: node
     plan: free
-    buildCommand: npm install --legacy-peer-deps && npm run build
+    nodeVersion: "22"
+    buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /health
     envVars:
