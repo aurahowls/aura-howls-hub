@@ -2,6 +2,7 @@ services:
   - type: web
     name: aurahowls
     runtime: node
+    nodeVersion: 22
     plan: free
     buildCommand: npm install && npm run build
     startCommand: npm start
