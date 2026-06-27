@@ -67,6 +67,17 @@ function serveStatic(req, res) {
 
 const server = http.createServer(async (req, res) => {
   try {
+    // Health check — handled before anything else so Render always gets a fast 200
+    if (req.url === '/health' && (req.method === 'GET' || req.method === 'HEAD')) {
+      const body = JSON.stringify({ status: 'ok' });
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Length', Buffer.byteLength(body));
+      res.setHeader('Cache-Control', 'no-store');
+      res.end(req.method === 'HEAD' ? undefined : body);
+      return;
+    }
+
     // Try static files first
     if (req.method === 'GET' || req.method === 'HEAD') {
       if (serveStatic(req, res)) return;
