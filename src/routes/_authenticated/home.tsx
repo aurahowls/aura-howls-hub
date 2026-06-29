@@ -106,63 +106,11 @@ function HomePage() {
   }
 
   return (
-    <AppShell>
-      <div className="mb-4 flex items-center justify-between">
-        <h1 className="font-display text-3xl font-bold">Your Den</h1>
-        <div className="flex rounded-full border border-border bg-card/60 p-1 text-sm backdrop-blur">
-          {([
-            { id: "foryou", label: "For You" },
-            { id: "following", label: "Following Pack" },
-          ] as { id: Tab; label: string }[]).map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={cn(
-                "rounded-full px-4 py-1.5 transition",
-                tab === t.id
-                  ? "bg-primary/15 font-medium text-primary"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <AnnouncementBanner />
-      <HowlComposer onPosted={handlePosted} />
-
-      <div className="space-y-3">
-        {loading ? (
-          Array.from({ length: 3 }).map((_, i) => <HowlSkeleton key={i} />)
-        ) : items.length === 0 ? (
-          <EmptyFeed
-            tab={tab}
-            suggested={suggested}
-            onSwitchTab={() => setTab("foryou")}
-          />
-        ) : (
-          <>
-            {items.map((h) => (
-              <HowlCard key={h.id} howl={h} onChanged={() => loadFirst(tab)} onDeleted={() => loadFirst(tab)} />
-            ))}
-            <div ref={sentinelRef} />
-            {loadingMore && (
-              <div className="flex items-center justify-center gap-2 py-6 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" /> Tracking more Howls…
-              </div>
-            )}
-            {!hasMore && (
-              <p className="py-6 text-center text-xs text-muted-foreground">
-                🌙 You've reached the edge of the forest.
-              </p>
-            )}
-          </>
-        )}
-      </div>
-    </AppShell>
-  );
+  <AppShell>
+    <h1>Home Page Test</h1>
+  </AppShell>
+);
+  ;
 }
 
 function EmptyFeed({
