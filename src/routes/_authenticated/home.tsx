@@ -105,9 +105,11 @@ function HomePage() {
     void loadFirst(tab);
   }
 
-  return (
+ return (
   <AppShell>
-    <h1>Home Page Test</h1>
+    <h1 style={{ color: "red", fontSize: "50px" }}>
+      HOME PAGE TEST
+    </h1>
   </AppShell>
 );
   ;
